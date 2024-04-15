@@ -25,7 +25,7 @@ def get_critical_point(state):
         crit_state.p = state.p_critical()
         crit_state.rhomolar = state.rhomolar_critical()
         crit_state.stable = True
-    except:
+    except:  # TODO: explict exception clause
         try:
             for crit_state_tmp in state.all_critical_points():
                 if crit_state_tmp.stable and (crit_state_tmp.T > crit_state.T or not np.isfinite(crit_state.T)):
@@ -33,7 +33,7 @@ def get_critical_point(state):
                     crit_state.p = crit_state_tmp.p
                     crit_state.rhomolar = crit_state_tmp.rhomolar
                     crit_state.stable = crit_state_tmp.stable
-        except:
+        except:  # TODO: explict exception clause
             raise ValueError("Could not calculate the critical point data.")
     new_state = AbstractState(state.backend_name(), '&'.join(state.fluid_names()))
     masses = state.get_mass_fractions()
@@ -83,8 +83,8 @@ def interpolate_values_1d(x, y, x_points=None, kind='linear'):
     except ImportError:
         if kind != 'linear':
             warnings.warn(
-              "You requested a non-linear interpolation, but SciPy is not available. Falling back to linear interpolation.",
-              UserWarning)
+                "You requested a non-linear interpolation, but SciPy is not available. Falling back to linear interpolation.",
+                UserWarning)
         if x_points is None:
             return np.interp((x[np.isfinite(x)]), x, y)
         else:
@@ -118,9 +118,12 @@ def process_fluid_state(fluid_ref, fractions='mole'):
         fluids, fractions = extract_fractions(fluids)
         state = AbstractState(backend, '&'.join(fluids))
         if len(fluids) > 1 and len(fluids) == len(fractions):
-            if fractions == 'mass': state.set_mass_fractions(fractions)
-            elif fractions == 'volu': state.set_volu_fractions(fractions)
-            else: state.set_mole_fractions(fractions)
+            if fractions == 'mass':
+                state.set_mass_fractions(fractions)
+            elif fractions == 'volu':
+                state.set_volu_fractions(fractions)
+            else:
+                state.set_mole_fractions(fractions)
         return state
     elif isinstance(fluid_ref, AbstractState):
         return fluid_ref
@@ -218,93 +221,130 @@ class PropertyDict(with_metaclass(ABCMeta), object):
         self._Q = None
 
     @property
-    def D(self): return self._D
+    def D(self):
+        return self._D
 
     @D.setter
-    def D(self, value): self._D = value
+    def D(self, value):
+        self._D = value
 
     @property
-    def H(self): return self._H
+    def H(self):
+        return self._H
 
     @H.setter
-    def H(self, value): self._H = value
+    def H(self, value):
+        self._H = value
 
     @property
-    def P(self): return self._P
+    def P(self):
+        return self._P
 
     @P.setter
-    def P(self, value): self._P = value
+    def P(self, value):
+        self._P = value
 
     @property
-    def S(self): return self._S
+    def S(self):
+        return self._S
 
     @S.setter
-    def S(self, value): self._S = value
+    def S(self, value):
+        self._S = value
 
     @property
-    def T(self): return self._T
+    def T(self):
+        return self._T
 
     @T.setter
-    def T(self, value): self._T = value
+    def T(self, value):
+        self._T = value
 
     @property
-    def U(self): return self._U
+    def U(self):
+        return self._U
 
     @U.setter
-    def U(self, value): self._U = value
+    def U(self, value):
+        self._U = value
 
     @property
-    def Q(self): return self._Q
+    def Q(self):
+        return self._Q
 
     @Q.setter
-    def Q(self, value): self._Q = value
+    def Q(self, value):
+        self._Q = value
 
     @property
     def dimensions(self):
         return {
-      CoolProp.iDmass: self._D,
-      CoolProp.iHmass: self._H,
-      CoolProp.iP: self._P,
-      CoolProp.iSmass: self._S,
-      CoolProp.iT: self._T,
-      CoolProp.iUmass: self._U,
-      CoolProp.iQ: self._Q
-    }
+            CoolProp.iDmass: self._D,
+            CoolProp.iHmass: self._H,
+            CoolProp.iP: self._P,
+            CoolProp.iSmass: self._S,
+            CoolProp.iT: self._T,
+            CoolProp.iUmass: self._U,
+            CoolProp.iQ: self._Q
+        }
 
     def __getitem__(self, index):
         """Allow for property access via square brackets"""
         idx = _get_index(index)
-        if idx == CoolProp.iDmass: return self.D
-        elif idx == CoolProp.iHmass: return self.H
-        elif idx == CoolProp.iP: return self.P
-        elif idx == CoolProp.iSmass: return self.S
-        elif idx == CoolProp.iT: return self.T
-        elif idx == CoolProp.iUmass: return self.U
-        elif idx == CoolProp.iQ: return self.Q
-        else: raise IndexError("Unknown index \"{0:s}\".".format(str(index)))
+        if idx == CoolProp.iDmass:
+            return self.D
+        elif idx == CoolProp.iHmass:
+            return self.H
+        elif idx == CoolProp.iP:
+            return self.P
+        elif idx == CoolProp.iSmass:
+            return self.S
+        elif idx == CoolProp.iT:
+            return self.T
+        elif idx == CoolProp.iUmass:
+            return self.U
+        elif idx == CoolProp.iQ:
+            return self.Q
+        else:
+            raise IndexError("Unknown index \"{0:s}\".".format(str(index)))
 
     def __setitem__(self, index, value):
         """Allow for property access via square brackets"""
         idx = _get_index(index)
-        if idx == CoolProp.iDmass: self.D = value
-        elif idx == CoolProp.iHmass: self.H = value
-        elif idx == CoolProp.iP: self.P = value
-        elif idx == CoolProp.iSmass: self.S = value
-        elif idx == CoolProp.iT: self.T = value
-        elif idx == CoolProp.iUmass: self.U = value
-        elif idx == CoolProp.iQ: self.Q = value
-        else: raise IndexError("Unknown index \"{0:s}\".".format(str(index)))
+        if idx == CoolProp.iDmass:
+            self.D = value
+        elif idx == CoolProp.iHmass:
+            self.H = value
+        elif idx == CoolProp.iP:
+            self.P = value
+        elif idx == CoolProp.iSmass:
+            self.S = value
+        elif idx == CoolProp.iT:
+            self.T = value
+        elif idx == CoolProp.iUmass:
+            self.U = value
+        elif idx == CoolProp.iQ:
+            self.Q = value
+        else:
+            raise IndexError("Unknown index \"{0:s}\".".format(str(index)))
 
 
 class SIunits(PropertyDict):
     def __init__(self):
-        self._D = BaseDimension(add_SI=0.0, mul_SI=1.0, off_SI=0.0, label='Density', symbol=u'd', unit=u'kg/m3')
-        self._H = BaseDimension(add_SI=0.0, mul_SI=1.0, off_SI=0.0, label='Specific Enthalpy', symbol=u'h', unit=u'J/kg')
-        self._P = BaseDimension(add_SI=0.0, mul_SI=1.0, off_SI=0.0, label='Pressure', symbol=u'p', unit=u'Pa')
-        self._S = BaseDimension(add_SI=0.0, mul_SI=1.0, off_SI=0.0, label='Specific Entropy', symbol=u's', unit=u'J/kg/K')
-        self._T = BaseDimension(add_SI=0.0, mul_SI=1.0, off_SI=0.0, label='Temperature', symbol=u'T', unit=u'K')
-        self._U = BaseDimension(add_SI=0.0, mul_SI=1.0, off_SI=0.0, label='Specific Internal Energy', symbol=u'u', unit=u'J/kg')
-        self._Q = BaseDimension(add_SI=0.0, mul_SI=1.0, off_SI=0.0, label='Vapour Quality', symbol=u'x', unit=u'')
+        self._D = BaseDimension(add_SI=0.0, mul_SI=1.0, off_SI=0.0,
+                                label='Density', symbol=u'd', unit=u'kg/m3')
+        self._H = BaseDimension(add_SI=0.0, mul_SI=1.0, off_SI=0.0,
+                                label='Specific Enthalpy', symbol=u'h', unit=u'J/kg')
+        self._P = BaseDimension(add_SI=0.0, mul_SI=1.0, off_SI=0.0,
+                                label='Pressure', symbol=u'p', unit=u'Pa')
+        self._S = BaseDimension(add_SI=0.0, mul_SI=1.0, off_SI=0.0,
+                                label='Specific Entropy', symbol=u's', unit=u'J/kg/K')
+        self._T = BaseDimension(add_SI=0.0, mul_SI=1.0, off_SI=0.0,
+                                label='Temperature', symbol=u'T', unit=u'K')
+        self._U = BaseDimension(add_SI=0.0, mul_SI=1.0, off_SI=0.0,
+                                label='Specific Internal Energy', symbol=u'u', unit=u'J/kg')
+        self._Q = BaseDimension(add_SI=0.0, mul_SI=1.0, off_SI=0.0,
+                                label='Vapour Quality', symbol=u'x', unit=u'')
 
 
 class KSIunits(SIunits):
@@ -344,50 +384,56 @@ class Base2DObject(with_metaclass(ABCMeta), object):
     PU = CoolProp.iP * 10 + CoolProp.iUmass
 
     PLOTS = {
-      'TS': TS,
-      'PH': PH,
-      'HS': HS,
-      'PS': PS,
-      'PD': PD,
-      'TD': TD,
-      'PT': PT,
+        'TS': TS,
+        'PH': PH,
+        'HS': HS,
+        'PS': PS,
+        'PD': PD,
+        'TD': TD,
+        'PT': PT,
     }
 
     PLOTS_INV = {v: k for k, v in PLOTS.items()}
 
-#     # A list of supported plot
-#     @property
-#     def TS(self): return type(self).TS
-#     @property
-#     def PH(self): return CoolProp.iP*10     + CoolProp.iHmass
-#     @property
-#     def HS(self): return CoolProp.iHmass*10 + CoolProp.iSmass
-#     @property
-#     def PS(self): return CoolProp.iP*10     + CoolProp.iSmass
-#     @property
-#     def PD(self): return CoolProp.iP*10     + CoolProp.iDmass
-#     @property
-#     def TD(self): return CoolProp.iT*10     + CoolProp.iDmass
-#     @property
-#     def PT(self): return CoolProp.iP*10     + CoolProp.iT
-#     @property
-#     def PU(self): return CoolProp.iP*10     + CoolProp.iUmass
+    #     # A list of supported plot
+    #     @property
+    #     def TS(self): return type(self).TS
+    #     @property
+    #     def PH(self): return CoolProp.iP*10     + CoolProp.iHmass
+    #     @property
+    #     def HS(self): return CoolProp.iHmass*10 + CoolProp.iSmass
+    #     @property
+    #     def PS(self): return CoolProp.iP*10     + CoolProp.iSmass
+    #     @property
+    #     def PD(self): return CoolProp.iP*10     + CoolProp.iDmass
+    #     @property
+    #     def TD(self): return CoolProp.iT*10     + CoolProp.iDmass
+    #     @property
+    #     def PT(self): return CoolProp.iP*10     + CoolProp.iT
+    #     @property
+    #     def PU(self): return CoolProp.iP*10     + CoolProp.iUmass
 
     def __init__(self, x_type, y_type, state=None, small=None):
         self._x_index = _get_index(x_type)
         self._y_index = _get_index(y_type)
         self._critical_state = None
-        if small is not None: self._small = small
-        else: self._small = 1e-7
-        if state is not None: self.state = state
-        else: self._state = None
+        if small is not None:
+            self._small = small
+        else:
+            self._small = 1e-7
+        if state is not None:
+            self.state = state
+        else:
+            self._state = None
 
     # A list of supported plot
     @property
-    def x_index(self): return self._x_index
+    def x_index(self):
+        return self._x_index
 
     @property
-    def y_index(self): return self._y_index
+    def y_index(self):
+        return self._y_index
 
     @property
     def critical_state(self):
@@ -396,7 +442,8 @@ class Base2DObject(with_metaclass(ABCMeta), object):
         return self._critical_state
 
     @property
-    def state(self): return self._state
+    def state(self):
+        return self._state
 
     @state.setter
     def state(self, value):
@@ -404,8 +451,8 @@ class Base2DObject(with_metaclass(ABCMeta), object):
         # try: self._state.build_phase_envelope("dummy")
         # except: pass
         self._critical_state = None
-        #self._T_small = self._state.trivial_keyed_output(CoolProp.iT_critical)*self._small
-        #self._P_small = self._state.trivial_keyed_output(CoolProp.iP_critical)*self._small
+        # self._T_small = self._state.trivial_keyed_output(CoolProp.iT_critical)*self._small
+        # self._P_small = self._state.trivial_keyed_output(CoolProp.iP_critical)*self._small
         self._T_small = self.critical_state.keyed_output(CoolProp.iT) * self._small
         self._P_small = self.critical_state.keyed_output(CoolProp.iP) * self._small
 
@@ -419,7 +466,7 @@ class Base2DObject(with_metaclass(ABCMeta), object):
         T_triple = self._state.trivial_keyed_output(CoolProp.iT_triple)
         try:
             T_min = self._state.trivial_keyed_output(CoolProp.iT_min)
-        except:
+        except:  # TODO: explict exception clause
             T_min = T_triple
         self._state.update(CoolProp.QT_INPUTS, 0, max([T_triple, T_min]) + self._T_small)
         kind = _get_index(kind)
@@ -437,8 +484,9 @@ class Base2DObject(with_metaclass(ABCMeta), object):
                 sat_min = smin
             else:
                 warnings.warn(
-                  "Your minimum {0:s} has been ignored, {1:f} is not between {2:f} and {3:f}".format(self.PROPERTIES[kind], smin, fluid_min, fluid_max),
-                  UserWarning)
+                    "Your minimum {0:s} has been ignored, {1:f} is not between {2:f} and {3:f}".format(
+                        self.PROPERTIES[kind], smin, fluid_min, fluid_max),
+                    UserWarning)
                 sat_min = fluid_min
         else:
             sat_min = fluid_min
@@ -448,8 +496,9 @@ class Base2DObject(with_metaclass(ABCMeta), object):
                 sat_max = smax
             else:
                 warnings.warn(
-                  "Your maximum {0:s} has been ignored, {1:f} is not between {2:f} and {3:f}".format(self.PROPERTIES[kind], smax, fluid_min, fluid_max),
-                  UserWarning)
+                    "Your maximum {0:s} has been ignored, {1:f} is not between {2:f} and {3:f}".format(
+                        self.PROPERTIES[kind], smax, fluid_min, fluid_max),
+                    UserWarning)
                 sat_max = fluid_max
         else:
             sat_max = fluid_max
@@ -465,12 +514,18 @@ class IsoLine(Base2DObject):
     # Normally we calculate a sweep in x-dimensions, but
     # sometimes a sweep in y-dimensions is better.
     XY_SWITCH = {
-      CoolProp.iDmass: {Base2DObject.TS: True, Base2DObject.PH: True, Base2DObject.HS: False, Base2DObject.PS: True, Base2DObject.PD: None, Base2DObject.TD: None, Base2DObject.PT: False},
-      CoolProp.iHmass: {Base2DObject.TS: False, Base2DObject.PH: None, Base2DObject.HS: None, Base2DObject.PS: True, Base2DObject.PD: True, Base2DObject.TD: False, Base2DObject.PT: False},
-      CoolProp.iP: {Base2DObject.TS: False, Base2DObject.PH: None, Base2DObject.HS: False, Base2DObject.PS: None, Base2DObject.PD: None, Base2DObject.TD: False, Base2DObject.PT: None},
-      CoolProp.iSmass: {Base2DObject.TS: None, Base2DObject.PH: True, Base2DObject.HS: None, Base2DObject.PS: None, Base2DObject.PD: True, Base2DObject.TD: False, Base2DObject.PT: True},
-      CoolProp.iT: {Base2DObject.TS: None, Base2DObject.PH: True, Base2DObject.HS: False, Base2DObject.PS: False, Base2DObject.PD: False, Base2DObject.TD: None, Base2DObject.PT: None},
-      CoolProp.iQ: {Base2DObject.TS: True, Base2DObject.PH: True, Base2DObject.HS: True, Base2DObject.PS: True, Base2DObject.PD: True, Base2DObject.TD: True, Base2DObject.PT: False}
+        CoolProp.iDmass: {Base2DObject.TS: True, Base2DObject.PH: True, Base2DObject.HS: False, Base2DObject.PS: True,
+                          Base2DObject.PD: None, Base2DObject.TD: None, Base2DObject.PT: False},
+        CoolProp.iHmass: {Base2DObject.TS: False, Base2DObject.PH: None, Base2DObject.HS: None, Base2DObject.PS: True,
+                          Base2DObject.PD: True, Base2DObject.TD: False, Base2DObject.PT: False},
+        CoolProp.iP: {Base2DObject.TS: False, Base2DObject.PH: None, Base2DObject.HS: False, Base2DObject.PS: None,
+                      Base2DObject.PD: None, Base2DObject.TD: False, Base2DObject.PT: None},
+        CoolProp.iSmass: {Base2DObject.TS: None, Base2DObject.PH: True, Base2DObject.HS: None, Base2DObject.PS: None,
+                          Base2DObject.PD: True, Base2DObject.TD: False, Base2DObject.PT: True},
+        CoolProp.iT: {Base2DObject.TS: None, Base2DObject.PH: True, Base2DObject.HS: False, Base2DObject.PS: False,
+                      Base2DObject.PD: False, Base2DObject.TD: None, Base2DObject.PT: None},
+        CoolProp.iQ: {Base2DObject.TS: True, Base2DObject.PH: True, Base2DObject.HS: True, Base2DObject.PS: True,
+                      Base2DObject.PD: True, Base2DObject.TD: True, Base2DObject.PT: False}
     }
 
     # Abort interpolation if there are not enough
@@ -480,31 +535,40 @@ class IsoLine(Base2DObject):
     def __init__(self, i_index, x_index, y_index, value=0.0, state=None):
         super(IsoLine, self).__init__(x_index, y_index, state)
         self._i_index = _get_index(i_index)
-        if value is not None: self.value = value
-        else: self._value = None
+        if value is not None:
+            self.value = value
+        else:
+            self._value = None
         self._x = None
         self._y = None
 
     @property
-    def i_index(self): return self._i_index
+    def i_index(self):
+        return self._i_index
 
     @property
-    def value(self): return self._value
+    def value(self):
+        return self._value
 
     @value.setter
-    def value(self, value): self._value = float(value)
+    def value(self, value):
+        self._value = float(value)
 
     @property
-    def x(self): return self._x
+    def x(self):
+        return self._x
 
     @x.setter
-    def x(self, value): self._x = np.array(value)
+    def x(self, value):
+        self._x = np.array(value)
 
     @property
-    def y(self): return self._y
+    def y(self):
+        return self._y
 
     @y.setter
-    def y(self, value): self._y = np.array(value)
+    def y(self, value):
+        self._y = np.array(value)
 
     def get_update_pair(self):
         """Processes the values for the isoproperty and the graph dimensions
@@ -560,46 +624,52 @@ class IsoLine(Base2DObject):
 
         Tcrit = self.critical_state.keyed_output(CoolProp.iT)
         Pcrit = self.critical_state.keyed_output(CoolProp.iP)
-        Dcrit = self.critical_state.keyed_output(CoolProp.iDmass)
         try:
-            #self.state.update(CoolProp.DmassT_INPUTS, Dcrit, Tcrit)
-            #xcrit = self.state.keyed_output(self._x_index)
-            #ycrit = self.state.keyed_output(self._y_index)
+            # self.state.update(CoolProp.DmassT_INPUTS, Dcrit, Tcrit)
+            # xcrit = self.state.keyed_output(self._x_index)
+            # ycrit = self.state.keyed_output(self._y_index)
             xcrit = self.critical_state.keyed_output(self._x_index)
             ycrit = self.critical_state.keyed_output(self._y_index)
-        except:
+        except:  # TODO: explict exception clause
             warnings.warn(
-              "An error occurred for the critical inputs, skipping it.",
-              UserWarning)
+                "An error occurred for the critical inputs, skipping it.",
+                UserWarning
+            )
             xcrit = np.NaN
             ycrit = np.NaN
 
-        X = np.empty_like(one)
-        Y = np.empty_like(one)
+        x = np.empty_like(one)
+        y = np.empty_like(one)
 
         err = False
         for index, _ in np.ndenumerate(one):
             try:
                 self.state.update(pair, one[index], two[index])
-                X[index] = self.state.keyed_output(self._x_index)
-                Y[index] = self.state.keyed_output(self._y_index)
+                x[index] = self.state.keyed_output(self._x_index)
+                y[index] = self.state.keyed_output(self._y_index)
             except Exception as e:
-                if (pair == CoolProp.QT_INPUTS and abs(two[index] - Tcrit) < 1e0) or \
-                   (pair == CoolProp.PQ_INPUTS and abs(one[index] - Pcrit) < 1e2):
-                    X[index] = xcrit
-                    Y[index] = ycrit
+                condition1 = pair == CoolProp.QT_INPUTS and abs(two[index] - Tcrit) < 1e0
+                condition2 = pair == CoolProp.PQ_INPUTS and abs(one[index] - Pcrit) < 1e2
+                if condition1 or condition2:
+                    x[index] = xcrit
+                    y[index] = ycrit
                     warnings.warn(
-                  "An error occurred for near critical inputs {0:f}, {1:f} with index {2:s}: {3:s}".format(one[index], two[index], str(index), str(e)),
-                  UserWarning)
+                        "An error occurred for near critical inputs {0:f}, {1:f} with index {2:s}: {3:s}".format(
+                            one[index], two[index], str(index), str(e)),
+                        UserWarning
+                    )
                     pass
 
                 warnings.warn(
-                  "An error occurred for inputs {0:f}, {1:f} with index {2:s}: {3:s}".format(one[index], two[index], str(index), str(e)),
-                  UserWarning)
-                X[index] = np.NaN
-                Y[index] = np.NaN
+                    "An error occurred for inputs {0:f}, {1:f} with index {2:s}: {3:s}".format(
+                        one[index], two[index], str(index), str(e)),
+                    UserWarning
+                )
+                x[index] = np.NaN
+                y[index] = np.NaN
                 err = True
-        self.x = X; self.y = Y
+        self.x = x;
+        self.y = y
         return
 
     def calc_range(self, xvals=None, yvals=None):
@@ -607,10 +677,14 @@ class IsoLine(Base2DObject):
         if self.i_index == CoolProp.iQ:
             warnings.warn(
                 "Please use \"calc_sat_range\" to calculate saturation and isoquality lines. Input ranges are discarded.",
-                UserWarning)
-            if xvals is not None: self.calc_sat_range(num=xvals.size)
-            elif yvals is not None: self.calc_sat_range(num=yvals.size)
-            else: self.calc_sat_range()
+                UserWarning
+            )
+            if xvals is not None:
+                self.calc_sat_range(num=xvals.size)
+            elif yvals is not None:
+                self.calc_sat_range(num=yvals.size)
+            else:
+                self.calc_sat_range()
             return
 
         ipos, xpos, ypos, pair = self.get_update_pair()
@@ -619,7 +693,10 @@ class IsoLine(Base2DObject):
         idxs = [v for (_, v) in sorted(zip(order, [self.i_index, self.x_index, self.y_index]))]
         vals = [v for (_, v) in sorted(zip(order, [np.array(self.value), xvals, yvals]))]
         if vals[0] is None or vals[1] is None:
-            raise ValueError("One required input is missing, make sure to supply the correct xvals ({0:s}) or yvals ({1:s}).".format(str(xvals), str(yvals)))
+            raise ValueError(
+                "One required input is missing, make sure to supply the correct xvals ({0:s}) or yvals ({1:s}).".format(
+                    str(xvals), str(yvals))
+            )
 
         if vals[0].size > vals[1].size:
             vals[1] = np.resize(vals[1], vals[0].shape)
@@ -630,8 +707,7 @@ class IsoLine(Base2DObject):
         err = False
         guesses = CoolProp.CoolProp.PyGuessesStructure()
         # Only use the guesses for selected inputs
-        if pair == CoolProp.HmolarP_INPUTS \
-          or pair == CoolProp.HmassP_INPUTS:
+        if pair == CoolProp.HmolarP_INPUTS or pair == CoolProp.HmassP_INPUTS:
             # or pair == CoolProp.HmassSmass_INPUTS \
             # or pair == CoolProp.HmolarSmolar_INPUTS \
             # or pair == CoolProp.PSmass_INPUTS \
@@ -653,8 +729,10 @@ class IsoLine(Base2DObject):
                 vals[2][index] = self.state.keyed_output(idxs[2])
             except Exception as e:
                 warnings.warn(
-                  "An error occurred for inputs {0:f}, {1:f} with index {2:s}: {3:s}".format(vals[0][index], vals[1][index], str(index), str(e)),
-                  UserWarning)
+                    "An error occurred for inputs {0:f}, {1:f} with index {2:s}: {3:s}".format(
+                        vals[0][index], vals[1][index], str(index), str(e)),
+                    UserWarning
+                )
                 vals[2][index] = np.NaN
                 guesses.rhomolar = np.NaN
                 guesses.T = np.NaN
@@ -666,8 +744,6 @@ class IsoLine(Base2DObject):
 
     def sanitize_data(self):
         """Fill the series via interpolation"""
-        validx = None; validy = None
-        countx = None; county = None
         if self.x is not None:
             validx = np.isfinite(self.x)
             countx = float(self.x.size)
@@ -681,10 +757,11 @@ class IsoLine(Base2DObject):
 
         if min([np.sum(validx) / countx, np.sum(validy) / county]) < self.VALID_REQ:
             warnings.warn(
-              "Poor data quality, there are not enough valid entries for x ({0:f}/{1:f}) or y ({2:f}/{3:f}).".format(np.sum(validx), countx, np.sum(validy), county),
-              UserWarning)
+                "Poor data quality, there are not enough valid entries for x ({0:f}/{1:f}) or y ({2:f}/{3:f}).".format(
+                    np.sum(validx), countx, np.sum(validy), county),
+                UserWarning)
         # TODO: use filter and cubic splines!
-        #filter = np.logical_and(np.isfinite(self.x),np.isfinite(self.y))
+        # filter = np.logical_and(np.isfinite(self.x),np.isfinite(self.y))
         if np.sum(validy) > np.sum(validx):
             self.x = interpolate_values_1d(self.y, self.x, x_points=self.y[validy])
             self.y = self.y[validy]
@@ -699,28 +776,28 @@ class BasePlot(Base2DObject):
 
     # Define the iteration keys
     PROPERTIES = {
-      CoolProp.iDmass: 'density',
-      CoolProp.iHmass: 'specific enthalpy',
-      CoolProp.iP: 'pressure',
-      CoolProp.iSmass: 'specific entropy',
-      CoolProp.iT: 'temperature',
-      CoolProp.iUmass: 'specific internal energy'
+        CoolProp.iDmass: 'density',
+        CoolProp.iHmass: 'specific enthalpy',
+        CoolProp.iP: 'pressure',
+        CoolProp.iSmass: 'specific entropy',
+        CoolProp.iT: 'temperature',
+        CoolProp.iUmass: 'specific internal energy'
     }
 
     # Define the unit systems
     UNIT_SYSTEMS = {
-      'SI': SIunits(),
-      'KSI': KSIunits(),
-      'EUR': EURunits()
+        'SI': SIunits(),
+        'KSI': KSIunits(),
+        'EUR': EURunits()
     }
 
     LINE_PROPS = {
-      CoolProp.iT: dict(color='Darkred', lw=0.25),
-      CoolProp.iP: dict(color='DarkCyan', lw=0.25),
-      CoolProp.iHmass: dict(color='DarkGreen', lw=0.25),
-      CoolProp.iDmass: dict(color='DarkBlue', lw=0.25),
-      CoolProp.iSmass: dict(color='DarkOrange', lw=0.25),
-      CoolProp.iQ: dict(color='black', lw=0.25)
+        CoolProp.iT: dict(color='Darkred', lw=0.25),
+        CoolProp.iP: dict(color='DarkCyan', lw=0.25),
+        CoolProp.iHmass: dict(color='DarkGreen', lw=0.25),
+        CoolProp.iDmass: dict(color='DarkBlue', lw=0.25),
+        CoolProp.iSmass: dict(color='DarkOrange', lw=0.25),
+        CoolProp.iQ: dict(color='black', lw=0.25)
     }
 
     ID_FACTOR = 10.0  # Values below this number are interpreted as factors
@@ -728,10 +805,10 @@ class BasePlot(Base2DObject):
     LO_FACTOR = 1.01  # Lower default limits: LO_FACTOR*T_triple and LO_FACTOR*p_triple
 
     TP_LIMITS = {
-      'NONE': [None, None, None, None],
-      'DEF': [LO_FACTOR, HI_FACTOR, LO_FACTOR, HI_FACTOR],
-      'ACHP': [173.15, 493.15, 0.25e5, HI_FACTOR],
-      'ORC': [273.15, 673.15, 0.25e5, HI_FACTOR]
+        'NONE': [None, None, None, None],
+        'DEF': [LO_FACTOR, HI_FACTOR, LO_FACTOR, HI_FACTOR],
+        'ACHP': [173.15, 493.15, 0.25e5, HI_FACTOR],
+        'ORC': [273.15, 673.15, 0.25e5, HI_FACTOR]
     }
 
     def __init__(self, fluid_ref, graph_type, unit_system='KSI', tp_limits='DEF', **kwargs):
@@ -756,13 +833,16 @@ class BasePlot(Base2DObject):
         Base2DObject.__init__(self, graph_type[1], graph_type[0], state, **kwargs)
 
     @property
-    def system(self): return self._system
+    def system(self):
+        return self._system
 
     @system.setter
     def system(self, value):
         value = value.upper()
-        if value in self.UNIT_SYSTEMS: self._system = self.UNIT_SYSTEMS[value]
-        else: raise ValueError("Invalid input, expected a string from {0:s}".format(str(self.UNIT_SYSTEMS.keys())))
+        if value in self.UNIT_SYSTEMS:
+            self._system = self.UNIT_SYSTEMS[value]
+        else:
+            raise ValueError("Invalid input, expected a string from {0:s}".format(str(self.UNIT_SYSTEMS.keys())))
 
     @property
     def limits(self):
@@ -778,22 +858,28 @@ class BasePlot(Base2DObject):
         elif len(value) == 4:
             self._limits = value
         else:
-            raise ValueError("Invalid input, expected a list with 4 items or a string from {0:s}".format(str(self.TP_LIMITS.keys())))
+            raise ValueError(
+                "Invalid input, expected a list with 4 items or a string from {0:s}".format(str(self.TP_LIMITS.keys())))
 
     @property
-    def figure(self): return self._figure
+    def figure(self):
+        return self._figure
 
     @figure.setter
-    def figure(self, value): self._figure = value
+    def figure(self, value):
+        self._figure = value
 
     @property
-    def axis(self): return self._axis
+    def axis(self):
+        return self._axis
 
     @axis.setter
-    def axis(self, value): self._axis = value
+    def axis(self, value):
+        self._axis = value
 
     @property
-    def props(self): return self._props
+    def props(self):
+        return self._props
 
     @props.setter
     def props(self, value):
@@ -803,53 +889,54 @@ class BasePlot(Base2DObject):
 
     def __sat_bounds(self, kind, smin=None, smax=None):
         warnings.warn(
-          "You called the deprecated function \"__sat_bounds\", \
-consider replacing it with \"_get_sat_bounds\".",
-          DeprecationWarning)
+            "You called the deprecated function \"__sat_bounds\", \
+  consider replacing it with \"_get_sat_bounds\".",
+            DeprecationWarning)
         return self._get_sat_bounds(kind, smin, smax)
 
     def _get_iso_label(self, isoline, unit=True):
         if self._system is not None:
             dim = self._system[isoline.i_index]
-            return str(r"$" + dim.symbol + "=" + str(dim.from_SI(isoline.value)) + "$ " + dim.unit if unit else "$").strip()
+            return str(
+                r"$" + dim.symbol + "=" + str(dim.from_SI(isoline.value)) + "$ " + dim.unit if unit else "$").strip()
         return str(isoline.value).strip()
 
     # def _get_phase_envelope(self):
     #
-    #HEOS = CoolProp.AbstractState("HEOS", fluid)
+    # HEOS = CoolProp.AbstractState("HEOS", fluid)
     # HEOS.build_phase_envelope("")
-    #PED = HEOS.get_phase_envelope_data()
-    #plt.plot(PED.T, np.log(PED.p))
+    # PED = HEOS.get_phase_envelope_data()
+    # plt.plot(PED.T, np.log(PED.p))
     # plt.show()
 
     def _plot_default_annotations(self):
-#         def filter_fluid_ref(fluid_ref):
-#             fluid_ref_string = fluid_ref
-#             if fluid_ref.startswith('REFPROP-MIX'):
-#                 end = 0
-#                 fluid_ref_string = ''
-#                 while fluid_ref.find('[', end + 1) != -1:
-#                     start = fluid_ref.find('&', end + 1)
-#                     if end == 0:
-#                         start = fluid_ref.find(':', end + 1)
-#                     end = fluid_ref.find('[', end + 1)
-#                     fluid_ref_string = ' '.join([fluid_ref_string,
-#                                                 fluid_ref[start+1:end], '+'])
-#                 fluid_ref_string = fluid_ref_string[0:len(fluid_ref_string)-2]
-#             return fluid_ref_string
-#
-#         if len(self.graph_type) == 2:
-#             y_axis_id = self.graph_type[0]
-#             x_axis_id = self.graph_type[1]
-#         else:
-#             y_axis_id = self.graph_type[0]
-#             x_axis_id = self.graph_type[1:len(self.graph_type)]
-#
-#         tl_str = "%s - %s Graph for %s"
-#         if not self.axis.get_title():
-#             self.axis.set_title(tl_str % (self.AXIS_LABELS[self.unit_system][y_axis_id][0],
-#                                           self.AXIS_LABELS[self.unit_system][x_axis_id][0],
-#                                           filter_fluid_ref(self.fluid_ref)))
+        #         def filter_fluid_ref(fluid_ref):
+        #             fluid_ref_string = fluid_ref
+        #             if fluid_ref.startswith('REFPROP-MIX'):
+        #                 end = 0
+        #                 fluid_ref_string = ''
+        #                 while fluid_ref.find('[', end + 1) != -1:
+        #                     start = fluid_ref.find('&', end + 1)
+        #                     if end == 0:
+        #                         start = fluid_ref.find(':', end + 1)
+        #                     end = fluid_ref.find('[', end + 1)
+        #                     fluid_ref_string = ' '.join([fluid_ref_string,
+        #                                                 fluid_ref[start+1:end], '+'])
+        #                 fluid_ref_string = fluid_ref_string[0:len(fluid_ref_string)-2]
+        #             return fluid_ref_string
+        #
+        #         if len(self.graph_type) == 2:
+        #             y_axis_id = self.graph_type[0]
+        #             x_axis_id = self.graph_type[1]
+        #         else:
+        #             y_axis_id = self.graph_type[0]
+        #             x_axis_id = self.graph_type[1:len(self.graph_type)]
+        #
+        #         tl_str = "%s - %s Graph for %s"
+        #         if not self.axis.get_title():
+        #             self.axis.set_title(tl_str % (self.AXIS_LABELS[self.unit_system][y_axis_id][0],
+        #                                           self.AXIS_LABELS[self.unit_system][x_axis_id][0],
+        #                                           filter_fluid_ref(self.fluid_ref)))
         if self._x_index in [CoolProp.iDmass, CoolProp.iP]:
             self.axis.set_xscale('log')
         if self._y_index in [CoolProp.iDmass, CoolProp.iP]:
@@ -910,23 +997,39 @@ consider replacing it with \"_get_sat_bounds\".",
         Ts_lo, Ts_hi = self._get_sat_bounds(CoolProp.iT)
         Ps_lo, Ps_hi = self._get_sat_bounds(CoolProp.iP)
 
-        if T_lo is None: T_lo = 0.0
-        elif T_lo < self.ID_FACTOR: T_lo *= Ts_lo
-        if T_hi is None: T_hi = 1e6
-        elif T_hi < self.ID_FACTOR: T_hi *= Ts_hi
-        if P_lo is None: P_lo = 0.0
-        elif P_lo < self.ID_FACTOR: P_lo *= Ps_lo
-        if P_hi is None: P_hi = 1e10
-        elif P_hi < self.ID_FACTOR: P_hi *= Ps_hi
+        if T_lo is None:
+            T_lo = 0.0
+        elif T_lo < self.ID_FACTOR:
+            T_lo *= Ts_lo
+        if T_hi is None:
+            T_hi = 1e6
+        elif T_hi < self.ID_FACTOR:
+            T_hi *= Ts_hi
+        if P_lo is None:
+            P_lo = 0.0
+        elif P_lo < self.ID_FACTOR:
+            P_lo *= Ps_lo
+        if P_hi is None:
+            P_hi = 1e10
+        elif P_hi < self.ID_FACTOR:
+            P_hi *= Ps_hi
 
-        try: T_lo = np.nanmax([T_lo, self._state.trivial_keyed_output(CoolProp.iT_min)])
-        except: pass
-        try: T_hi = np.nanmin([T_hi, self._state.trivial_keyed_output(CoolProp.iT_max)])
-        except: pass
-        try: P_lo = np.nanmax([P_lo, self._state.trivial_keyed_output(CoolProp.iP_min)])
-        except: pass
-        try: P_hi = np.nanmin([P_hi, self._state.trivial_keyed_output(CoolProp.iP_max)])
-        except: pass
+        try:
+            T_lo = np.nanmax([T_lo, self._state.trivial_keyed_output(CoolProp.iT_min)])
+        except:
+            pass
+        try:
+            T_hi = np.nanmin([T_hi, self._state.trivial_keyed_output(CoolProp.iT_max)])
+        except:
+            pass
+        try:
+            P_lo = np.nanmax([P_lo, self._state.trivial_keyed_output(CoolProp.iP_min)])
+        except:
+            pass
+        try:
+            P_hi = np.nanmin([P_hi, self._state.trivial_keyed_output(CoolProp.iP_max)])
+        except:
+            pass
 
         return [T_lo, T_hi, P_lo, P_hi]
 
@@ -948,15 +1051,18 @@ consider replacing it with \"_get_sat_bounds\".",
         """Returns the previously set limits or generates them and
         converts the default values to the selected unit system.
         Returns a list containing [xmin, xmax, ymin, ymax]"""
-        if x_index is None: x_index = self._x_index
-        if y_index is None: y_index = self._y_index
+        if x_index is None:
+            x_index = self._x_index
+        if y_index is None:
+            y_index = self._y_index
 
-        if x_index != self.x_index or y_index != self.y_index or \
-          self.axis.get_autoscalex_on() or self.axis.get_autoscaley_on():
+        if (x_index != self.x_index or y_index != self.y_index
+            or self.axis.get_autoscalex_on() or self.axis.get_autoscaley_on()):
             # One of them is not set or we work on a different set of axes
             T_lo, T_hi, P_lo, P_hi = self._get_Tp_limits()
 
-            X = [0.0] * 4; Y = [0.0] * 4
+            x = [0.0] * 4;
+            y = [0.0] * 4
             i = -1
             for T in [T_lo, T_hi]:
                 for P in [P_lo, P_hi]:
@@ -964,15 +1070,16 @@ consider replacing it with \"_get_sat_bounds\".",
                     try:
                         self._state.update(CoolProp.PT_INPUTS, P, T)
                         # TODO: include a check for P and T?
-                        X[i] = self._state.keyed_output(x_index)
-                        Y[i] = self._state.keyed_output(y_index)
-                    except:
-                        X[i] = np.nan; Y[i] = np.nan
+                        x[i] = self._state.keyed_output(x_index)
+                        y[i] = self._state.keyed_output(y_index)
+                    except:  # TODO: explict exception clause
+                        x[i] = np.nan
+                        y[i] = np.nan
             # Figure out what to update
             dim = self._system[x_index]
-            x_lim = [dim.from_SI(np.nanmin(X)), dim.from_SI(np.nanmax(X))]
+            x_lim = [dim.from_SI(np.nanmin(x)), dim.from_SI(np.nanmax(x))]
             dim = self._system[y_index]
-            y_lim = [dim.from_SI(np.nanmin(Y)), dim.from_SI(np.nanmax(Y))]
+            y_lim = [dim.from_SI(np.nanmin(y)), dim.from_SI(np.nanmax(y))]
             # Either update the axes limits or get them
             if x_index == self._x_index:
                 if self.axis.get_autoscalex_on():
@@ -1021,17 +1128,20 @@ consider replacing it with \"_get_sat_bounds\".",
         [[Fxmin, Fymin], [Fxmax, Fymax]] = pos
         DELTAX_fig = width * (Fxmax - Fxmin)
         DELTAY_fig = height * (Fymax - Fymin)
-        return [[Axmin, Axmax, Aymin, Aymax, Fxmin, Fxmax, Fymin, Fymax], [DELTAX_axis, DELTAY_axis, DELTAX_fig, DELTAY_fig]]
+        return [[Axmin, Axmax, Aymin, Aymax, Fxmin, Fxmax, Fymin, Fymax],
+                [DELTAX_axis, DELTAY_axis, DELTAX_fig, DELTAY_fig]]
 
     def _to_pixel_coords(self, xv, yv):
-        [[Axmin, Axmax, Aymin, Aymax, Fxmin, Fxmax, Fymin, Fymax], [DELTAX_axis, DELTAY_axis, DELTAX_fig, DELTAY_fig]] = self._get_conversion_data()
+        [[Axmin, Axmax, Aymin, Aymax, Fxmin, Fxmax, Fymin, Fymax],
+         [DELTAX_axis, DELTAY_axis, DELTAX_fig, DELTAY_fig]] = self._get_conversion_data()
         # Convert coords to pixels
         x = (xv - Axmin) / DELTAX_axis * DELTAX_fig + Fxmin
         y = (yv - Aymin) / DELTAY_axis * DELTAY_fig + Fymin
         return x, y
 
     def _to_data_coords(self, xv, yv):
-        [[Axmin, Axmax, Aymin, Aymax, Fxmin, Fxmax, Fymin, Fymax], [DELTAX_axis, DELTAY_axis, DELTAX_fig, DELTAY_fig]] = self._get_conversion_data()
+        [[Axmin, Axmax, Aymin, Aymax, Fxmin, Fxmax, Fymin, Fymax],
+         [DELTAX_axis, DELTAY_axis, DELTAX_fig, DELTAY_fig]] = self._get_conversion_data()
         # Convert back to measurements
         x = (xv - Fxmin) / DELTAX_fig * DELTAX_axis + Axmin
         y = (yv - Fymin) / DELTAY_fig * DELTAY_axis + Aymin
@@ -1042,10 +1152,10 @@ consider replacing it with \"_get_sat_bounds\".",
         """Get x and y coordinates and the linear interpolation derivative"""
         # Old implementation:
         # Get the rotation angle
-        #f = interp1d(xv, yv)
-        #y = f(x)
-        #h = 0.00001*x
-        #dy_dx = (f(x+h)-f(x-h))/(2*h)
+        # f = interp1d(xv, yv)
+        # y = f(x)
+        # h = 0.00001*x
+        # dy_dx = (f(x+h)-f(x-h))/(2*h)
         # return x,y,dy_dx
         if len(xv) == len(yv) and len(yv) > 1:  # assure same length
             if len(xv) == len(yv) and len(yv) == 2:  # only two points
@@ -1058,17 +1168,17 @@ consider replacing it with \"_get_sat_bounds\".",
                 else:
                     raise ValueError("Your coordinate has to be between the input values.")
             else:
-                limit = 1e-10                    # avoid hitting a point directly
-                diff = np.array(xv) - x        # get differences
+                limit = 1e-10  # avoid hitting a point directly
+                diff = np.array(xv) - x  # get differences
                 index = np.argmin(diff * diff)  # nearest neighbour
-                if (xv[index] < x < xv[index + 1]      # nearest below, positive inclination
-                  or xv[index] > x > xv[index + 1]):   # nearest above, negative inclination
+                if (xv[index] < x < xv[index + 1]  # nearest below, positive inclination
+                    or xv[index] > x > xv[index + 1]):  # nearest above, negative inclination
                     if diff[index] < limit:
                         index = [index - 1, index + 1]
                     else:
                         index = [index, index + 1]
-                elif (xv[index - 1] < x < xv[index]    # nearest above, positive inclination
-                  or xv[index - 1] > x > xv[index]):   # nearest below, negative inclination
+                elif (xv[index - 1] < x < xv[index]  # nearest above, positive inclination
+                      or xv[index - 1] > x > xv[index]):  # nearest below, negative inclination
                     if diff[index] < limit:
                         index = [index - 1, index + 1]
                     else:
@@ -1108,7 +1218,7 @@ consider replacing it with \"_get_sat_bounds\".",
             x, y, dy_dx = BasePlot.get_x_y_dydx(xv, yv, x)
             rot = np.arctan(dy_dx) / np.pi * 180.
         (x, y) = self._to_data_coords(x, y)
-        return (x, y, rot)
+        return x, y, rot
 
     def inline_label(self, xv, yv, x=None, y=None):
         """
@@ -1126,7 +1236,8 @@ consider replacing it with \"_get_sat_bounds\".",
         y = dimy.from_SI(y)
         return (x, y, rot)
 
-    def show(self):
+    @staticmethod
+    def show():
         plt.show()
 
     def savefig(self, *args, **kwargs):
@@ -1152,9 +1263,11 @@ if __name__ == "__main__":
     print(iso.x, iso.y)
 
     iso = IsoLine('Q', 'H', 'P', 0.0, state)
-    iso.calc_range(hr, pr); print(iso.x, iso.y)
+    iso.calc_range(hr, pr);
+    print(iso.x, iso.y)
     iso = IsoLine('Q', 'H', 'P', 1.0, state)
-    iso.calc_range(hr, pr); print(iso.x, iso.y)
+    iso.calc_range(hr, pr);
+    print(iso.x, iso.y)
 
     # bp = BasePlot(fluid_ref, graph_type, unit_system = 'KSI', **kwargs):
     bp = BasePlot('n-Pentane', 'PH', unit_system='EUR')
@@ -1162,6 +1275,6 @@ if __name__ == "__main__":
     # print(bp._get_iso_label(iso))
     print(bp.get_axis_limits())
 
-        # get_update_pair(CoolProp.iP,CoolProp.iSmass,CoolProp.iT) -> (0,1,2,CoolProp.PSmass_INPUTS)
-        # other values require switching and swapping
-        # get_update_pair(CoolProp.iSmass,CoolProp.iP,CoolProp.iHmass) -> (1,0,2,CoolProp.PSmass_INPUTS)
+    # get_update_pair(CoolProp.iP,CoolProp.iSmass,CoolProp.iT) -> (0,1,2,CoolProp.PSmass_INPUTS)
+    # other values require switching and swapping
+    # get_update_pair(CoolProp.iSmass,CoolProp.iP,CoolProp.iHmass) -> (1,0,2,CoolProp.PSmass_INPUTS)

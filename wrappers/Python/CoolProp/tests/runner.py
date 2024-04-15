@@ -2,7 +2,8 @@ from __future__ import print_function
 
 
 def run():
-    import nose, os
+    import nose
+    import os
 
     print('about to run the tests, please be patient')
     this_path, file = os.path.split(os.path.abspath(__file__))

@@ -67,17 +67,19 @@ class PropertyPlot(BasePlot):
         """
         super(PropertyPlot, self).__init__(fluid_name, graph_type, **kwargs)
         self._isolines = {}
-        #self._plines = {}
-        #self._ppoints = {}
+        # self._plines = {}
+        # self._ppoints = {}
         self.get_axis_limits()
         self._plot_default_annotations()
 
     @property
-    def isolines(self): return self._isolines
+    def isolines(self):
+        return self._isolines
+
     # @property
-    #def plines(self): return self._plines
+    # def plines(self): return self._plines
     # @property
-    #def ppoints(self): return self._ppoints
+    # def ppoints(self): return self._ppoints
 
     def show(self):
         self.draw()
@@ -87,7 +89,8 @@ class PropertyPlot(BasePlot):
         self.draw()
         super(PropertyPlot, self).savefig(*args, **kwargs)
 
-    def _plotRound(self, values):
+    @staticmethod
+    def _plot_round(values):
         """
         A function round an array-like object while maintaining the
         amount of entries. This is needed for the isolines since we
@@ -95,23 +98,24 @@ class PropertyPlot(BasePlot):
         know the spacing of the lines. A fixed number of digits after
         rounding might lead to reduced array size.
         """
-        inVal = np.unique(np.sort(np.array(values)))
-        output = inVal[1:] * 0.0
+        in_val = np.unique(np.sort(np.array(values)))
+        output = in_val[1:] * 0.0
         digits = -1
         limit = 10
-        lim = inVal * 0.0 + 10
+        lim = in_val * 0.0 + 10
         # remove less from the numbers until same length,
         # more than 10 significant digits does not really
         # make sense, does it?
-        while len(inVal) > len(output) and digits < limit:
+        while len(in_val) > len(output) and digits < limit:
             digits += 1
-            val = (np.around(np.log10(np.abs(inVal))) * -1) + digits + 1
+            val = (np.around(np.log10(np.abs(in_val))) * -1) + digits + 1
             val = np.where(val < lim, val, lim)
             val = np.where(val > -lim, val, -lim)
-            output = np.zeros(inVal.shape)
-            for i in range(len(inVal)):
-                output[i] = np.around(inVal[i], decimals=int(val[i]))
+            output = np.zeros(in_val.shape)
+            for i in range(len(in_val)):
+                output[i] = np.around(in_val[i], decimals=int(val[i]))
             output = np.unique(output)
+
         return output
 
     def calc_isolines(self, iso_type=None, iso_range=None, num=15, rounding=False, points=250):
@@ -145,7 +149,7 @@ class PropertyPlot(BasePlot):
         if len(iso_range) == 2:
             iso_range = self.generate_ranges(iso_type, iso_range[0], iso_range[1], num)
         if rounding:
-            iso_range = self._plotRound(iso_range)
+            iso_range = self._plot_round(iso_range)
 
         # Limits are already in SI units
         limits = self._get_axis_limits()
@@ -157,7 +161,13 @@ class PropertyPlot(BasePlot):
 
         lines = self.isolines.get(iso_type, [])
         for i in range(num):
-            lines.append(IsoLine(iso_type, self._x_index, self._y_index, value=dim.to_SI(iso_range[i]), state=self._state))
+            lines.append(IsoLine(
+                iso_type,
+                self._x_index,
+                self._y_index,
+                value=dim.to_SI(iso_range[i]),
+                state=self._state)
+            )
             lines[-1].calc_range(ixrange, iyrange)
             lines[-1].sanitize_data()
         self.isolines[iso_type] = lines
@@ -168,19 +178,27 @@ class PropertyPlot(BasePlot):
         dimy = self._system[self._y_index]
 
         sat_props = self.props[CoolProp.iQ].copy()
-        if 'lw' in sat_props: sat_props['lw'] *= 2.0
-        else: sat_props['lw'] = 1.0
-        if 'alpha' in sat_props: min([sat_props['alpha'] * 2.0, 1.0])
-        else: sat_props['alpha'] = 1.0
+        if 'lw' in sat_props:
+            sat_props['lw'] *= 2.0
+        else:
+            sat_props['lw'] = 1.0
+        if 'alpha' in sat_props:
+            min([sat_props['alpha'] * 2.0, 1.0])
+        else:
+            sat_props['alpha'] = 1.0
 
         for i in self.isolines:
             props = self.props[i]
-            dew = None; bub = None
-            xcrit = None; ycrit = None
+            dew = None;
+            bub = None
+            xcrit = None;
+            ycrit = None
             if i == CoolProp.iQ:
                 for line in self.isolines[i]:
-                    if line.value == 0.0: bub = line
-                    elif line.value == 1.0: dew = line
+                    if line.value == 0.0:
+                        bub = line
+                    elif line.value == 1.0:
+                        dew = line
                 if dew is not None and bub is not None:
                     xmin, xmax, ymin, ymax = self.get_axis_limits()
                     xmin = dimx.to_SI(xmin)
@@ -190,34 +208,40 @@ class PropertyPlot(BasePlot):
                     dx = xmax - xmin
                     dy = ymax - ymin
                     dew_filter = np.logical_and(np.isfinite(dew.x), np.isfinite(dew.y))
-                    #dew_filter = np.logical_and(dew_filter,dew.x>dew.x[-1])
+                    # dew_filter = np.logical_and(dew_filter,dew.x>dew.x[-1])
                     stp = min([dew_filter.size, 10])
                     dew_filter[0:-stp] = False
                     bub_filter = np.logical_and(np.isfinite(bub.x), np.isfinite(bub.y))
 
                     if self._x_index == CoolProp.iP or self._x_index == CoolProp.iDmass:
-                        filter_x = lambda x: np.log10(x)
+                        filter_x = lambda xx: np.log10(xx)
                     else:
-                        filter_x = lambda x: x
+                        filter_x = lambda xx: xx
                     if self._y_index == CoolProp.iP or self._y_index == CoolProp.iDmass:
-                        filter_y = lambda y: np.log10(y)
+                        filter_y = lambda yy: np.log10(yy)
                     else:
-                        filter_y = lambda y: y
+                        filter_y = lambda yy: yy
 
-                    if (  # (filter_x(dew.x[dew_filter][-1])-filter_x(bub.x[bub_filter][-1])) > 0.010*filter_x(dx) and
-                        (filter_x(dew.x[dew_filter][-1]) - filter_x(bub.x[bub_filter][-1])) < 0.050 * filter_x(dx) or
-                        (filter_y(dew.y[dew_filter][-1]) - filter_y(bub.y[bub_filter][-1])) < 0.010 * filter_y(dy)):
+                    condition1 = (filter_x(dew.x[dew_filter][-1]) - filter_x(bub.x[bub_filter][-1])) > 0.010 * filter_x(
+                        dx)
+                    condition2 = (filter_x(dew.x[dew_filter][-1]) - filter_x(bub.x[bub_filter][-1])) < 0.050 * filter_x(
+                        dx)
+                    condition3 = (filter_y(dew.y[dew_filter][-1]) - filter_y(bub.y[bub_filter][-1])) < 0.010 * filter_y(
+                        dy)
+                    # if condition1 and (condition2 or condition3):
+                    if condition2 or condition3:
                         x = np.linspace(bub.x[bub_filter][-1], dew.x[dew_filter][-1], 11)
                         y = interpolate_values_1d(
-                          np.append(bub.x[bub_filter], dew.x[dew_filter][::-1]),
-                          np.append(bub.y[bub_filter], dew.y[dew_filter][::-1]),
-                          x_points=x,
-                          kind='cubic')
+                            np.append(bub.x[bub_filter], dew.x[dew_filter][::-1]),
+                            np.append(bub.y[bub_filter], dew.y[dew_filter][::-1]),
+                            x_points=x,
+                            kind='cubic')
                         self.axis.plot(dimx.from_SI(x), dimy.from_SI(y), **sat_props)
                         warnings.warn("Detected an incomplete phase envelope, fixing it numerically.")
-                        xcrit = x[5]; ycrit = y[5]
-                        #Tcrit = self.state.trivial_keyed_output(CoolProp.iT_critical)
-                        #Dcrit = self.state.trivial_keyed_output(CoolProp.irhomass_critical)
+                        xcrit = x[5];
+                        ycrit = y[5]
+                        # Tcrit = self.state.trivial_keyed_output(CoolProp.iT_critical)
+                        # Dcrit = self.state.trivial_keyed_output(CoolProp.irhomass_critical)
                         # try:
                         #    self.state.update(CoolProp.DmassT_INPUTS, Dcrit, Tcrit)
                         #    xcrit = self.state.keyed_output(self._x_index)
@@ -225,28 +249,41 @@ class PropertyPlot(BasePlot):
                         # except:
                         #    xcrit = x[5]; ycrit = y[5]
                         #    pass
-                        #self.axis.plot(dimx.from_SI(np.array([bub.x[bub_filter][-1], dew.x[dew_filter][-1]])),dimy.from_SI(np.array([bub.y[bub_filter][-1], dew.y[dew_filter][-1]])),'o')
+                        # self.axis.plot(
+                        #     dimx.from_SI(np.array([bub.x[bub_filter][-1], dew.x[dew_filter][-1]])),
+                        #     dimy.from_SI(np.array([bub.y[bub_filter][-1], dew.y[dew_filter][-1]])),
+                        #     'o'
+                        # )
             for line in self.isolines[i]:
                 if line.i_index == CoolProp.iQ:
                     if line.value == 0.0 or line.value == 1.0:
                         self.axis.plot(dimx.from_SI(line.x), dimy.from_SI(line.y), **sat_props)
                     else:
                         if xcrit is not None and ycrit is not None:
-                            self.axis.plot(dimx.from_SI(np.append(line.x, xcrit)), dimy.from_SI(np.append(line.y, ycrit)), **props)
+                            self.axis.plot(dimx.from_SI(np.append(line.x, xcrit)),
+                                           dimy.from_SI(np.append(line.y, ycrit)), **props)
                             # try:
-                            #    x = np.append(line.x,[xcrit])
-                            #    y = np.append(line.y,[ycrit])
-                            #    fltr = np.logical_and(np.isfinite(x),np.isfinite(y))
-                            #    f = interp1d(x[fltr][-3:],y[fltr][-3:],kind='linear') # could also be quadratic
-                            #    x = np.linspace(x[fltr][-2], x[fltr][-1], 5)
-                            #    y = f(x)
-                            #    #f = interp1d(y[fltr][-5:],x[fltr][-5:],kind='cubic')
-                            #    #y = np.linspace(y[fltr][-2], y[fltr][-1], 5)
-                            #    #x = f(y)
-                            #    self.axis.plot(dimx.from_SI(np.append(line.x,x)),dimy.from_SI(np.append(line.y,y)),**props)
+                            #     x = np.append(line.x, [xcrit])
+                            #     y = np.append(line.y, [ycrit])
+                            #     fltr = np.logical_and(np.isfinite(x), np.isfinite(y))
+                            #     f = interp1d(x[fltr][-3:], y[fltr][-3:], kind='linear')  # could also be quadratic
+                            #     x = np.linspace(x[fltr][-2], x[fltr][-1], 5)
+                            #     y = f(x)
+                            #     # f = interp1d(y[fltr][-5:],x[fltr][-5:],kind='cubic')
+                            #     # y = np.linspace(y[fltr][-2], y[fltr][-1], 5)
+                            #     # x = f(y)
+                            #     self.axis.plot(
+                            #         dimx.from_SI(np.append(line.x, x)),
+                            #         dimy.from_SI(np.append(line.y, y)),
+                            #         **props
+                            #     )
                             # except:
-                            #    self.axis.plot(dimx.from_SI(np.append(line.x,xcrit)),dimy.from_SI(np.append(line.y,ycrit)),**props)
-                            #    pass
+                            # self.axis.plot(
+                            #     dimx.from_SI(np.append(line.x, xcrit)),
+                            #     dimy.from_SI(np.append(line.y, ycrit)),
+                            #     **props
+                            # )
+                            # pass
                 else:
                     self.axis.plot(dimx.from_SI(line.x), dimy.from_SI(line.y), **props)
 
@@ -341,14 +378,16 @@ class PropertyPlot(BasePlot):
 
 
 def InlineLabel(xv, yv, x=None, y=None, axis=None, fig=None):
-    warnings.warn("You called the deprecated function \"InlineLabel\", use \"BasePlot.inline_label\".", DeprecationWarning)
+    warnings.warn("You called the deprecated function \"InlineLabel\", use \"BasePlot.inline_label\".",
+                  DeprecationWarning)
     plot = PropertyPlot("water", "TS", figure=fig, axis=axis)
     return plot.inline_label(xv, yv, x, y)
 
 
 class PropsPlot(PropertyPlot):
     def __init__(self, fluid_name, graph_type, units='KSI', reciprocal_density=False, **kwargs):
-        super(PropsPlot, self).__init__(fluid_name, graph_type, unit_system=units, reciprocal_density=reciprocal_density, **kwargs)
+        super(PropsPlot, self).__init__(fluid_name, graph_type, unit_system=units,
+                                        reciprocal_density=reciprocal_density, **kwargs)
         warnings.warn("You called the deprecated class \"PropsPlot\", use \"PropertyPlot\".", DeprecationWarning)
 
 
