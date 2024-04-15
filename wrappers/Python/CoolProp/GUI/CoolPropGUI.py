@@ -8,6 +8,7 @@ from CoolProp.Plots.Plots import Ph, Ts
 from CoolProp.Plots import PsychChart
 import numpy as np
 
+
 # Munge the system path if necessary to add the lib folder (only really needed
 # for packaging using cx_Freeze)
 # if os.path.exists('lib') and os.path.abspath(os.path.join(os.curdir,'lib')) not in os.:
@@ -20,7 +21,7 @@ class PlotPanel(wx.Panel):
         self.figure = mpl.figure.Figure(dpi=100)
         self.canvas = WXCanvas(self, -1, self.figure)
         self.ax = self.figure.add_axes((0.15, 0.15, 0.8, 0.8))
-        #self.toolbar = WXToolbar(self.canvas)
+        # self.toolbar = WXToolbar(self.canvas)
         # self.toolbar.Realize()
         sizer.Add(self.canvas, 1, wx.EXPAND)
         # sizer.Add(self.toolbar)
@@ -42,6 +43,8 @@ class TSPlotFrame(wx.Frame):
            Tmin=CP.CoolProp.Props(str(Fluid), 'Ttriple') + 0.01)
         sizer.Layout()
 
+        self.MenuBar = None
+        self.File = None
         self.add_menu()
 
     def add_menu(self):
@@ -49,9 +52,9 @@ class TSPlotFrame(wx.Frame):
         self.MenuBar = wx.MenuBar()
         self.File = wx.Menu()
 
-        mnuItem = wx.MenuItem(self.File, -1, "Edit...", "", wx.ITEM_NORMAL)
+        mnu_item = wx.MenuItem(self.File, -1, "Edit...", "", wx.ITEM_NORMAL)
 
-        self.File.AppendItem(mnuItem)
+        self.File.AppendItem(mnu_item)
         self.MenuBar.Append(self.File, "File")
 
         self.SetMenuBar(self.MenuBar)
@@ -60,6 +63,14 @@ class TSPlotFrame(wx.Frame):
 class PsychOptions(wx.Dialog):
     def __init__(self, parent):
         wx.Dialog.__init__(self, parent)
+
+        self.p_label = None
+        self.p = None
+        self.Tmin_label = None
+        self.Tmin = None
+        self.Tmax_label = None
+        self.Tmax = None
+        self.GoButton = None
 
         self.build_contents()
         self.layout()
@@ -87,7 +98,6 @@ class PsychOptions(wx.Dialog):
 
 class PsychPlotFrame(wx.Frame):
     def __init__(self, Tmin=263.15, Tmax=333.15, p=101.325, **kwargs):
-
         wx.Frame.__init__(self, None, title='Psychrometric plot', **kwargs)
 
         sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -102,20 +112,22 @@ class PsychPlotFrame(wx.Frame):
         PsychChart.p = p
         PsychChart.Tdb = np.linspace(Tmin, Tmax)
 
-        SL = PsychChart.SaturationLine()
-        SL.plot(self.PP.ax)
+        sl = PsychChart.SaturationLine()
+        sl.plot(self.PP.ax)
 
-        RHL = PsychChart.HumidityLines([0.05, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9])
-        RHL.plot(self.PP.ax)
+        rhl = PsychChart.HumidityLines([0.05, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9])
+        rhl.plot(self.PP.ax)
 
-        HL = PsychChart.EnthalpyLines(range(-20, 100, 10))
-        HL.plot(self.PP.ax)
+        hl = PsychChart.EnthalpyLines(range(-20, 100, 10))
+        hl.plot(self.PP.ax)
 
-        PF = PsychChart.PlotFormatting()
-        PF.plot(self.PP.ax)
+        pf = PsychChart.PlotFormatting()
+        pf.plot(self.PP.ax)
 
         sizer.Layout()
 
+        self.MenuBar = None
+        self.File = None
         self.add_menu()
 
         self.PP.toolbar = WXToolbar(self.PP.canvas)
@@ -129,9 +141,9 @@ class PsychPlotFrame(wx.Frame):
         self.MenuBar = wx.MenuBar()
         self.File = wx.Menu()
 
-        mnuItem = wx.MenuItem(self.File, -1, "Edit...", "", wx.ITEM_NORMAL)
+        mnu_item = wx.MenuItem(self.File, -1, "Edit...", "", wx.ITEM_NORMAL)
 
-        self.File.AppendItem(mnuItem)
+        self.File.AppendItem(mnu_item)
         self.MenuBar.Append(self.File, "File")
 
         self.SetMenuBar(self.MenuBar)
@@ -151,6 +163,8 @@ class PHPlotFrame(wx.Frame):
            Tmin=CP.CoolProp.Props(str(Fluid), 'Ttriple') + 0.01)
         sizer.Layout()
 
+        self.MenuBar = None
+        self.File = None
         self.add_menu()
 
     def add_menu(self):
@@ -158,9 +172,9 @@ class PHPlotFrame(wx.Frame):
         self.MenuBar = wx.MenuBar()
         self.File = wx.Menu()
 
-        mnuItem = wx.MenuItem(self.File, -1, "Edit...", "", wx.ITEM_NORMAL)
+        mnu_item = wx.MenuItem(self.File, -1, "Edit...", "", wx.ITEM_NORMAL)
 
-        self.File.AppendItem(mnuItem)
+        self.File.AppendItem(mnu_item)
         self.MenuBar.Append(self.File, "File")
 
         self.SetMenuBar(self.MenuBar)
@@ -204,14 +218,18 @@ class SaturationTableDialog(wx.Dialog):
         self.Accept = wx.Button(self, label="Accept")
 
         sizer = wx.FlexGridSizer(cols=2)
-        sizer.AddMany([self.FluidLabel, self.FluidCombo,
-                       self.TtripleLabel, self.TtripleValue,
-                       self.TcritLabel, self.TcritValue])
+        sizer.AddMany([
+            self.FluidLabel, self.FluidCombo,
+            self.TtripleLabel, self.TtripleValue,
+            self.TcritLabel, self.TcritValue
+        ])
         sizer.AddSpacer(10)
         sizer.AddSpacer(10)
-        sizer.AddMany([self.NvalsLabel, self.NvalsValue,
-                       self.TminLabel, self.TminValue,
-                       self.TmaxLabel, self.TmaxValue])
+        sizer.AddMany([
+            self.NvalsLabel, self.NvalsValue,
+            self.TminLabel, self.TminValue,
+            self.TmaxLabel, self.TmaxValue
+        ])
         sizer.Add(self.Accept)
 
         self.Bind(wx.EVT_COMBOBOX, self.OnSelectFluid)
@@ -233,13 +251,13 @@ class SaturationTableDialog(wx.Dialog):
             self.EndModal(wx.ID_CANCEL)
 
     def get_values(self):
-        Fluid = str(self.FluidCombo.GetStringSelection())
-        if Fluid:
-            N = float(self.NvalsValue.GetValue())
-            Tmin = float(self.TminValue.GetValue())
-            Tmax = float(self.TmaxValue.GetValue())
-            Tvals = np.linspace(Tmin, Tmax, N)
-            return Fluid, Tvals
+        fluid = str(self.FluidCombo.GetStringSelection())
+        if fluid:
+            n = float(self.NvalsValue.GetValue())
+            tmin = float(self.TminValue.GetValue())
+            tmax = float(self.TmaxValue.GetValue())
+            tvals = np.linspace(tmin, tmax, n)
+            return fluid, tvals
         else:
             return '', []
 
@@ -253,10 +271,10 @@ class SaturationTableDialog(wx.Dialog):
         self.EndModal(wx.ID_OK)
 
     def OnSelectFluid(self, event=None):
-        Fluid = str(self.FluidCombo.GetStringSelection())
-        if Fluid:
-            Tcrit = CP.CoolProp.Props(Fluid, 'Tcrit')
-            Ttriple = CP.CoolProp.Props(Fluid, 'Ttriple')
+        fluid = str(self.FluidCombo.GetStringSelection())
+        if fluid:
+            Tcrit = CP.CoolProp.Props(fluid, 'Tcrit')
+            Ttriple = CP.CoolProp.Props(fluid, 'Ttriple')
             self.TcritValue.SetValue(str(Tcrit))
             self.TtripleValue.SetValue(str(Ttriple))
             self.NvalsValue.SetValue('100')
@@ -269,30 +287,28 @@ class SaturationTable(wx.Frame):
         wx.Frame.__init__(self, parent)
         self.Fluid, self.Tvals = self.OnSelect()
         if self.Fluid:
-            self.tbl = SimpleGrid(self,
-                                  ncol=len(self.Tvals)
-                                  )
+            self.tbl = SimpleGrid(self, ncol=len(self.Tvals))
             sizer = wx.BoxSizer(wx.VERTICAL)
             sizer.Add(self.tbl, 1, wx.EXPAND)
             self.SetSizer(sizer)
             sizer.Layout()
             self.build()
+
+            self.MenuBar = None
+            self.File = None
             self.add_menu()
         else:
             self.Destroy()
 
-    def OnSelect(self, event=None):
+    @staticmethod
+    def OnSelect(event=None):
+        fluid = None
+        tvals = None
         dlg = SaturationTableDialog(None)
         if dlg.ShowModal() == wx.ID_OK:
-            Fluid, Tvals = dlg.get_values()
-            cancel = False
-        else:
-            cancel = True
+            fluid, tvals = dlg.get_values()
         dlg.Destroy()
-        if not cancel:
-            return Fluid, Tvals
-        else:
-            return None, None
+        return fluid, tvals
 
     def build(self):
         self.SetTitle('Saturation Table: ' + self.Fluid)
@@ -303,34 +319,34 @@ class SaturationTable(wx.Frame):
         self.tbl.SetColLabelValue(4, "Vapor Density\n[kg/m3]")
 
         for i, T in enumerate(self.Tvals):
-            Fluid = self.Fluid
-            pL = CP.CoolProp.Props('P', 'T', T, 'Q', 0, Fluid)
-            pV = CP.CoolProp.Props('P', 'T', T, 'Q', 1, Fluid)
-            rhoL = CP.CoolProp.Props('D', 'T', T, 'Q', 0, Fluid)
-            rhoV = CP.CoolProp.Props('D', 'T', T, 'Q', 1, Fluid)
+            fluid = self.Fluid
+            p_l = CP.CoolProp.Props('P', 'T', T, 'Q', 0, fluid)
+            p_v = CP.CoolProp.Props('P', 'T', T, 'Q', 1, fluid)
+            rho_l = CP.CoolProp.Props('D', 'T', T, 'Q', 0, fluid)
+            rho_v = CP.CoolProp.Props('D', 'T', T, 'Q', 1, fluid)
 
             self.tbl.SetCellValue(i, 0, str(T))
-            self.tbl.SetCellValue(i, 1, str(pL))
-            self.tbl.SetCellValue(i, 2, str(pV))
-            self.tbl.SetCellValue(i, 3, str(rhoL))
-            self.tbl.SetCellValue(i, 4, str(rhoV))
+            self.tbl.SetCellValue(i, 1, str(p_l))
+            self.tbl.SetCellValue(i, 2, str(p_v))
+            self.tbl.SetCellValue(i, 3, str(rho_l))
+            self.tbl.SetCellValue(i, 4, str(rho_v))
 
     def add_menu(self):
         # Menu Bar
         self.MenuBar = wx.MenuBar()
         self.File = wx.Menu()
 
-        mnuItem0 = wx.MenuItem(self.File, -1, "Select All \tCtrl+A", "", wx.ITEM_NORMAL)
-        mnuItem1 = wx.MenuItem(self.File, -1, "Copy selected data \tCtrl+C", "", wx.ITEM_NORMAL)
-        mnuItem2 = wx.MenuItem(self.File, -1, "Copy table w/ headers \tCtrl+H", "", wx.ITEM_NORMAL)
+        mnu_item0 = wx.MenuItem(self.File, -1, "Select All \tCtrl+A", "", wx.ITEM_NORMAL)
+        mnu_item1 = wx.MenuItem(self.File, -1, "Copy selected data \tCtrl+C", "", wx.ITEM_NORMAL)
+        mnu_item2 = wx.MenuItem(self.File, -1, "Copy table w/ headers \tCtrl+H", "", wx.ITEM_NORMAL)
 
-        self.File.AppendItem(mnuItem0)
-        self.File.AppendItem(mnuItem1)
-        self.File.AppendItem(mnuItem2)
+        self.File.AppendItem(mnu_item0)
+        self.File.AppendItem(mnu_item1)
+        self.File.AppendItem(mnu_item2)
         self.MenuBar.Append(self.File, "Edit")
-        self.Bind(wx.EVT_MENU, lambda event: self.tbl.SelectAll(), mnuItem0)
-        self.Bind(wx.EVT_MENU, self.OnCopy, mnuItem1)
-        self.Bind(wx.EVT_MENU, self.OnCopyHeaders, mnuItem2)
+        self.Bind(wx.EVT_MENU, lambda event: self.tbl.SelectAll(), mnu_item0)
+        self.Bind(wx.EVT_MENU, self.OnCopy, mnu_item1)
+        self.Bind(wx.EVT_MENU, self.OnCopyHeaders, mnu_item2)
 
         self.SetMenuBar(self.MenuBar)
 
@@ -347,10 +363,13 @@ class SaturationTable(wx.Frame):
         # Tabs '\t' for cols and '\r' for rows
         for r in range(rows):
             for c in range(cols):
-                data = data + str(self.tbl.GetCellValue(self.tbl.GetSelectionBlockTopLeft()[0][0] + r, self.tbl.GetSelectionBlockTopLeft()[0][1] + c))
+                data += str(self.tbl.GetCellValue(
+                    self.tbl.GetSelectionBlockTopLeft()[0][0] + r,
+                    self.tbl.GetSelectionBlockTopLeft()[0][1] + c)
+                )
                 if c < cols - 1:
-                    data = data + '\t'
-            data = data + '\n'
+                    data += '\t'
+            data += '\n'
         # Create text data object
         clipboard = wx.TextDataObject()
         # Set data object value
@@ -377,15 +396,18 @@ class SaturationTable(wx.Frame):
             data += str(self.tbl.GetColLabelValue(c).replace('\n', ' '))
             if c < cols - 1:
                 data += '\t'
-        data = data + '\n'
+        data += '\n'
         # For each cell in selected range append the cell value in the data variable
         # Tabs '\t' for cols and '\r' for rows
         for r in range(rows):
             for c in range(cols):
-                data = data + str(self.tbl.GetCellValue(self.tbl.GetSelectionBlockTopLeft()[0][0] + r, self.tbl.GetSelectionBlockTopLeft()[0][1] + c))
+                data += str(self.tbl.GetCellValue(
+                    self.tbl.GetSelectionBlockTopLeft()[0][0] + r,
+                    self.tbl.GetSelectionBlockTopLeft()[0][1] + c)
+                )
                 if c < cols - 1:
-                    data = data + '\t'
-            data = data + '\n'
+                    data += '\t'
+            data += '\n'
         # Create text data object
         clipboard = wx.TextDataObject()
         # Set data object value
@@ -404,6 +426,14 @@ class MainFrame(wx.Frame):
     def __init__(self):
         wx.Frame.__init__(self, None)
 
+        self.MenuBar = None
+        self.plots = None
+        self.PHPlot = None
+        self.TSPlot = None
+        self.tables = None
+        self.PsychPlot = None
+        self.SatTable = None
+
         self.build()
 
     def build(self):
@@ -418,13 +448,13 @@ class MainFrame(wx.Frame):
         self.SatTable = wx.MenuItem(self.tables, -1, ' Saturation Table', "", wx.ITEM_NORMAL)
 
         for Fluid in sorted(CP.__fluids__):
-            mnuItem = wx.MenuItem(self.PHPlot, -1, Fluid, "", wx.ITEM_NORMAL)
-            self.PHPlot.AppendItem(mnuItem)
-            self.Bind(wx.EVT_MENU, lambda event: self.OnPHPlot(event, mnuItem), mnuItem)
+            mnu_item = wx.MenuItem(self.PHPlot, -1, Fluid, "", wx.ITEM_NORMAL)
+            self.PHPlot.AppendItem(mnu_item)
+            self.Bind(wx.EVT_MENU, lambda event: self.OnPHPlot(event, mnu_item), mnu_item)
 
-            mnuItem = wx.MenuItem(self.TSPlot, -1, Fluid, "", wx.ITEM_NORMAL)
-            self.TSPlot.AppendItem(mnuItem)
-            self.Bind(wx.EVT_MENU, lambda event: self.OnTSPlot(event, mnuItem), mnuItem)
+            mnu_item = wx.MenuItem(self.TSPlot, -1, Fluid, "", wx.ITEM_NORMAL)
+            self.TSPlot.AppendItem(mnu_item)
+            self.Bind(wx.EVT_MENU, lambda event: self.OnTSPlot(event, mnu_item), mnu_item)
 
         self.MenuBar.Append(self.plots, "Plots")
         self.plots.AppendItem(self.PsychPlot)
@@ -437,35 +467,37 @@ class MainFrame(wx.Frame):
 
         self.SetMenuBar(self.MenuBar)
 
-    def OnPsychPlot(self, event=None):
+    @staticmethod
+    def OnPsychPlot(event=None):
 
         # Load the options
         dlg = PsychOptions(None)
         if dlg.ShowModal() == wx.ID_OK:
-            Tmin = float(dlg.Tmin.GetValue()) + 273.15
-            Tmax = float(dlg.Tmax.GetValue()) + 273.15
+            tmin = float(dlg.Tmin.GetValue()) + 273.15
+            tmax = float(dlg.Tmax.GetValue()) + 273.15
             p = float(dlg.p.GetValue())
-            PPF = PsychPlotFrame(Tmin=Tmin, Tmax=Tmax, p=p, size=(1000, 700))
-            PPF.Show()
+            ppf = PsychPlotFrame(Tmin=tmin, Tmax=tmax, p=p, size=(1000, 700))
+            ppf.Show()
         dlg.Destroy()
 
-    def OnSatTable(self, event):
-        TBL = SaturationTable(None)
-        TBL.Show()
+    @staticmethod
+    def OnSatTable(event):
+        tbl = SaturationTable(None)
+        tbl.Show()
 
     def OnPHPlot(self, event, mnuItem):
         # Make a p-h plot instance in a new frame
         # Get the label (Fluid name)
-        Fluid = self.PHPlot.FindItemById(event.Id).Label
-        PH = PHPlotFrame(Fluid)
-        PH.Show()
+        fluid = self.PHPlot.FindItemById(event.Id).Label
+        ph = PHPlotFrame(fluid)
+        ph.Show()
 
     def OnTSPlot(self, event, mnuItem):
         # Make a p-h plot instance in a new frame
         # Get the label (Fluid name)
-        Fluid = self.TSPlot.FindItemById(event.Id).Label
-        TS = TSPlotFrame(Fluid)
-        TS.Show()
+        fluid = self.TSPlot.FindItemById(event.Id).Label
+        ts = TSPlotFrame(fluid)
+        ts.Show()
 
 
 if __name__ == '__main__':

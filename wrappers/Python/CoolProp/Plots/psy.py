@@ -1,6 +1,5 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
 import os
 import cPickle
 from ConfigParser import ConfigParser
@@ -13,7 +12,8 @@ from pylab import Figure
 from CoolProp.HumidAirProp import HAProps, HAProps_Aux
 
 from PyQt4.QtGui import (QDialog, QGridLayout, QProgressBar, QLabel,
-                         QDialogButtonBox, QPushButton, QFileDialog, QApplication)
+                         QDialogButtonBox, QPushButton, QFileDialog,
+                         QApplication)
 
 Preferences = ConfigParser()
 config_path = os.path.join(os.path.dirname(__file__), "psyrc")
@@ -29,7 +29,7 @@ def _Pbar(Z):
     return
         standard atmosphere barometric pressure, Pa
     """
-    return 101325. * (1 - 2.25577e-5 * Z)**5.256
+    return 101325. * (1 - 2.25577e-5 * Z) ** 5.256
 
 
 class PsychroPlot(FigureCanvasQTAgg):
@@ -45,8 +45,7 @@ class PsychroPlot(FigureCanvasQTAgg):
         self.setParent(parent)
         self.axes2D = self.fig.add_subplot(111)
         FigureCanvasQTAgg.updateGeometry(self)
-        self.axes2D.figure.subplots_adjust(left=0.01, right=0.92,
-                                           bottom=0.05, top=0.98)
+        self.axes2D.figure.subplots_adjust(left=0.01, right=0.92, bottom=0.05, top=0.98)
         self.notes = []
 
     def plot(self, *args, **kwargs):
@@ -74,7 +73,8 @@ class PsychroPlot(FigureCanvasQTAgg):
         for key, txt in zip(keys, units):
             self.notes.append(self.axes2D.annotate(
                 "%s: %0.4f %s" % (key, state.__getattribute__(key), txt), (0.01, yi),
-                xycoords='axes fraction', size="small", va="center"))
+                xycoords='axes fraction', size="small", va="center"
+            ))
             yi -= 0.025
         self.draw()
 
@@ -113,9 +113,8 @@ class PsyCoolprop(object):
     """
     kwargs = {"z": 0.0,
               "P": 0.0,
-
               "tdb": 0.0,
-              "tdb": 0.0,
+              # "tdb": 0.0,
               "twb": 0.0,
               "w": None,
               "HR": None,
@@ -125,6 +124,23 @@ class PsyCoolprop(object):
     msg = "Unknown variables"
 
     def __init__(self, **kwargs):
+        self.tdp = None
+        self.tdb = None
+        self.twb = None
+        self.P = None
+        self.Pvs = None
+        self.Pv = None
+        self.ws = None
+        self.w = None
+        self.HR = None
+        self.mu = None
+        self.v = None
+        self.rho = None
+        self.h = None
+        self.Xa = None
+        self.Xw = None
+
+        self._mode = None
         self.kwargs = self.__class__.kwargs.copy()
         self.__call__(**kwargs)
 
@@ -142,20 +158,20 @@ class PsyCoolprop(object):
         tdb = self.kwargs.get("tdb", 0)
         twb = self.kwargs.get("twb", 0)
         w = self.kwargs.get("w", None)
-        HR = self.kwargs.get("HR", None)
+        hr = self.kwargs.get("HR", None)
         h = self.kwargs.get("h", None)
         v = self.kwargs.get("v", 0)
 
         self._mode = 0
         if tdb and w is not None:
             self._mode = ("Tdb", "W")
-        elif tdb and HR is not None:
+        elif tdb and hr is not None:
             self._mode = ("Tdb", "RH")
         elif tdb and twb:
             self._mode = ("Tdb", "Twb")
         elif tdb and tdp:
             self._mode = ("Tdb", "Tdp")
-        elif tdp and HR is not None:
+        elif tdp and hr is not None:
             self._mode = ("Tdp", "RH")
 
         return bool(self._mode)
@@ -284,7 +300,7 @@ class PsyCoolprop(object):
 
         # Twb
         lines = cls.LineList("isotwb", Preferences)
-        Twb = {}
+        twb = {}
         cont = 0
         for T in lines:
             ws = HAProps("W", "P", P_kPa, "RH", 1, "Tdb", T)
@@ -292,8 +308,8 @@ class PsyCoolprop(object):
             Tw = [T - 273.15, HAProps("Tdb", "P", P_kPa, "Twb", T, "RH", 0) - 273.15]
             cont += 1
             parent.progressBar.setValue(15 + 75 * cont / len(lines))
-            Twb[T] = (H, Tw)
-        data["Twb"] = Twb
+            twb[T] = (H, Tw)
+        data["Twb"] = twb
 
         # v
         lines = cls.LineList("isochor", Preferences)
@@ -346,8 +362,8 @@ class UI_Psychrometry(QDialog):
         layout.addWidget(self.status, 2, 1)
 
         self.buttonBox = QDialogButtonBox(QDialogButtonBox.Close)
-        butonPNG = QPushButton("Save as PNG")
-        self.buttonBox.addButton(butonPNG, QDialogButtonBox.AcceptRole)
+        buton_png = QPushButton("Save as PNG")
+        self.buttonBox.addButton(buton_png, QDialogButtonBox.AcceptRole)
         self.buttonBox.rejected.connect(self.reject)
         self.buttonBox.accepted.connect(self.savePNG)
         layout.addWidget(self.buttonBox, 2, 2)
@@ -358,10 +374,11 @@ class UI_Psychrometry(QDialog):
         """Save chart image to png file"""
         fname = unicode(QFileDialog.getSaveFileName(
             self, "Save chart to file",
-            "./", "Portable Network Graphics (*.png)"))
+            "./", "Portable Network Graphics (*.png)"
+        ))
         self.diagrama2D.fig.savefig(fname, facecolor='#eeeeee')
 
-    def drawlabel(self, name, Preferences, t, W, label, unit):
+    def drawlabel(self, name, preferences, t, W, label, unit):
         """
         Draw annotation for isolines
             name: name of isoline
@@ -371,12 +388,12 @@ class UI_Psychrometry(QDialog):
             label: text value to draw
             unit: text units to draw
         """
-        if Preferences.getboolean("Psychr", name + "label"):
-            tmin = Preferences.getfloat("Psychr", "isotdbStart") - 273.15
-            tmax = Preferences.getfloat("Psychr", "isotdbEnd") - 273.15
+        if preferences.getboolean("Psychr", name + "label"):
+            tmin = preferences.getfloat("Psychr", "isotdbStart") - 273.15
+            tmax = preferences.getfloat("Psychr", "isotdbEnd") - 273.15
             x = tmax - tmin
-            wmin = Preferences.getfloat("Psychr", "isowStart")
-            wmax = Preferences.getfloat("Psychr", "isowEnd")
+            wmin = preferences.getfloat("Psychr", "isowStart")
+            wmax = preferences.getfloat("Psychr", "isowEnd")
             y = wmax - wmin
 
             i = 0
@@ -384,18 +401,20 @@ class UI_Psychrometry(QDialog):
                 if tmin <= ti <= tmax and wmin <= wi <= wmax:
                     i += 1
             label = str(label)
-            if Preferences.getboolean("Psychr", name + "units"):
+            if preferences.getboolean("Psychr", name + "units"):
                 label += unit
-            pos = Preferences.getfloat("Psychr", name + "position")
+            pos = preferences.getfloat("Psychr", name + "position")
             p = int(i * pos / 100 - 1)
             rot = np.arctan((W[p] - W[p - 1]) / y / (t[p] - t[p - 1]) * x) * 360.0 / 2.0 / np.pi
-            self.diagrama2D.axes2D.annotate(label, (t[p], W[p]),
-                rotation=rot, size="small", ha="center", va="center")
+            self.diagrama2D.axes2D.annotate(
+                label, (t[p], W[p]),
+                rotation=rot, size="small", ha="center", va="center"
+            )
 
     def plot(self):
         """Plot chart"""
-        Preferences = ConfigParser()
-        Preferences.read("psyrc")
+        preferences = ConfigParser()
+        preferences.read("psyrc")
 
         self.diagrama2D.axes2D.clear()
         self.diagrama2D.config()
@@ -415,23 +434,23 @@ class UI_Psychrometry(QDialog):
         self.status.setText("Plotting...")
         QApplication.processEvents()
 
-        tmax = Preferences.getfloat("Psychr", "isotdbEnd") - 273.15
+        tmax = preferences.getfloat("Psychr", "isotdbEnd") - 273.15
 
         t = [ti - 273.15 for ti in data["t"]]
         Hs = data["Hs"]
         format = {}
-        format["ls"] = Preferences.get("Psychr", "saturationlineStyle")
-        format["lw"] = Preferences.getfloat("Psychr", "saturationlineWidth")
-        format["color"] = Preferences.get("Psychr", "saturationColor")
-        format["marker"] = Preferences.get("Psychr", "saturationmarker")
+        format["ls"] = preferences.get("Psychr", "saturationlineStyle")
+        format["lw"] = preferences.getfloat("Psychr", "saturationlineWidth")
+        format["color"] = preferences.get("Psychr", "saturationColor")
+        format["marker"] = preferences.get("Psychr", "saturationmarker")
         format["markersize"] = 3
         self.diagrama2D.plot(t, Hs, **format)
 
         format = {}
-        format["ls"] = Preferences.get("Psychr", "isotdblineStyle")
-        format["lw"] = Preferences.getfloat("Psychr", "isotdblineWidth")
-        format["color"] = Preferences.get("Psychr", "isotdbColor")
-        format["marker"] = Preferences.get("Psychr", "isotdbmarker")
+        format["ls"] = preferences.get("Psychr", "isotdblineStyle")
+        format["lw"] = preferences.getfloat("Psychr", "isotdblineWidth")
+        format["color"] = preferences.get("Psychr", "isotdbColor")
+        format["marker"] = preferences.get("Psychr", "isotdbmarker")
         format["markersize"] = 3
         for i, T in enumerate(t):
             self.diagrama2D.plot([T, T], [0, Hs[i]], **format)
@@ -439,47 +458,47 @@ class UI_Psychrometry(QDialog):
         H = data["H"]
         th = data["th"]
         format = {}
-        format["ls"] = Preferences.get("Psychr", "isowlineStyle")
-        format["lw"] = Preferences.getfloat("Psychr", "isowlineWidth")
-        format["color"] = Preferences.get("Psychr", "isowColor")
-        format["marker"] = Preferences.get("Psychr", "isowmarker")
+        format["ls"] = preferences.get("Psychr", "isowlineStyle")
+        format["lw"] = preferences.getfloat("Psychr", "isowlineWidth")
+        format["color"] = preferences.get("Psychr", "isowColor")
+        format["marker"] = preferences.get("Psychr", "isowmarker")
         format["markersize"] = 3
         for i, H in enumerate(H):
             self.diagrama2D.plot([th[i], tmax], [H, H], **format)
 
         format = {}
-        format["ls"] = Preferences.get("Psychr", "isohrlineStyle")
-        format["lw"] = Preferences.getfloat("Psychr", "isohrlineWidth")
-        format["color"] = Preferences.get("Psychr", "isohrColor")
-        format["marker"] = Preferences.get("Psychr", "isohrmarker")
+        format["ls"] = preferences.get("Psychr", "isohrlineStyle")
+        format["lw"] = preferences.getfloat("Psychr", "isohrlineWidth")
+        format["color"] = preferences.get("Psychr", "isohrColor")
+        format["marker"] = preferences.get("Psychr", "isohrmarker")
         format["markersize"] = 3
         for Hr, H0 in data["Hr"].iteritems():
             self.diagrama2D.plot(t, H0, **format)
-            self.drawlabel("isohr", Preferences, t, H0, Hr, "%")
+            self.drawlabel("isohr", preferences, t, H0, Hr, "%")
 
         format = {}
-        format["ls"] = Preferences.get("Psychr", "isotwblineStyle")
-        format["lw"] = Preferences.getfloat("Psychr", "isotwblineWidth")
-        format["color"] = Preferences.get("Psychr", "isotwbColor")
-        format["marker"] = Preferences.get("Psychr", "isotwbmarker")
+        format["ls"] = preferences.get("Psychr", "isotwblineStyle")
+        format["lw"] = preferences.getfloat("Psychr", "isotwblineWidth")
+        format["color"] = preferences.get("Psychr", "isotwbColor")
+        format["marker"] = preferences.get("Psychr", "isotwbmarker")
         format["markersize"] = 3
         for T, (H, Tw) in data["Twb"].iteritems():
             self.diagrama2D.plot(Tw, H, **format)
             value = T - 273.15
             txt = u"ºC"
-            self.drawlabel("isotwb", Preferences, Tw, H, value, txt)
+            self.drawlabel("isotwb", preferences, Tw, H, value, txt)
 
         format = {}
-        format["ls"] = Preferences.get("Psychr", "isochorlineStyle")
-        format["lw"] = Preferences.getfloat("Psychr", "isochorlineWidth")
-        format["color"] = Preferences.get("Psychr", "isochorColor")
-        format["marker"] = Preferences.get("Psychr", "isochormarker")
+        format["ls"] = preferences.get("Psychr", "isochorlineStyle")
+        format["lw"] = preferences.getfloat("Psychr", "isochorlineWidth")
+        format["color"] = preferences.get("Psychr", "isochorColor")
+        format["marker"] = preferences.get("Psychr", "isochormarker")
         format["markersize"] = 3
         for v, (Td, H) in data["v"].iteritems():
             self.diagrama2D.plot(Td, H, **format)
             value = v
             txt = u"m³/kg"
-            self.drawlabel("isochor", Preferences, Td, H, value, txt)
+            self.drawlabel("isochor", preferences, Td, H, value, txt)
 
         self.diagrama2D.draw()
         self.status.setText("P = %i Pa" % P)
@@ -502,6 +521,7 @@ class UI_Psychrometry(QDialog):
 
 if __name__ == "__main__":
     import sys
+
     app = QApplication(sys.argv)
     aireHumedo = UI_Psychrometry()
     aireHumedo.show()

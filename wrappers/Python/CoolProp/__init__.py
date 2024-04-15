@@ -3,9 +3,10 @@ from __future__ import absolute_import
 # If there is a constants.[pyd|so|dylib] in the main directory, it will be imported instead of the constants.py file.
 # It should be removed as it is from the older version of CoolProp
 from . import constants
-if constants.__file__.rsplit('.', 1)[1] not in ['pyc', 'pyo', 'py']:
 
+if constants.__file__.rsplit('.', 1)[1] not in ['pyc', 'pyo', 'py']:
     import os
+
     try:
         os.remove(constants.__file__)
         print("constants shared library has been removed.  Please restart your python code")
@@ -24,6 +25,7 @@ __incompressibles_pure__ = CoolProp.get_global_param_string('incompressible_list
 __incompressibles_solution__ = CoolProp.get_global_param_string('incompressible_list_solution').split(',')
 __version__ = CoolProp.get_global_param_string('version')
 __gitrevision__ = CoolProp.get_global_param_string('gitrevision')
+
 
 def get(s):
     """

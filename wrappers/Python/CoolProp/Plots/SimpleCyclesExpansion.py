@@ -47,11 +47,11 @@ class SimpleRankineCycle(BasePowerCycle):
     """A simple Rankine cycle *without* regeneration"""
     STATECOUNT = 4
     STATECHANGE = [
-      lambda inp: BaseCycle.state_change(inp, 'S', 'P', 0, ty1='log', ty2='log'),  # Pumping process
-      lambda inp: BaseCycle.state_change(inp, 'H', 'P', 1, ty1='lin', ty2='lin'),  # Heat addition
-      lambda inp: BaseCycle.state_change(inp, 'H', 'P', 2, ty1='log', ty2='log'),  # Expansion
-      lambda inp: BaseCycle.state_change(inp, 'H', 'P', 3, ty1='lin', ty2='lin')  # Heat removal
-      ]
+        lambda inp: BaseCycle.state_change(inp, 'S', 'P', 0, ty1='log', ty2='log'),  # Pumping process
+        lambda inp: BaseCycle.state_change(inp, 'H', 'P', 1, ty1='lin', ty2='lin'),  # Heat addition
+        lambda inp: BaseCycle.state_change(inp, 'H', 'P', 2, ty1='log', ty2='log'),  # Expansion
+        lambda inp: BaseCycle.state_change(inp, 'H', 'P', 3, ty1='lin', ty2='lin')  # Heat removal
+    ]
 
     def __init__(self, fluid_ref='HEOS::Water', graph_type='TS', **kwargs):
         """see :class:`CoolProp.Plots.SimpleCycles.BasePowerCycle` for details."""

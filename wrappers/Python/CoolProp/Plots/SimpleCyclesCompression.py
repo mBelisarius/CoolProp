@@ -48,11 +48,11 @@ class SimpleCompressionCycle(BaseCompressionCycle):
     """A simple vapour compression cycle"""
     STATECOUNT = 4
     STATECHANGE = [
-      lambda inp: BaseCycle.state_change(inp, 'S', 'P', 0, ty1='log', ty2='log'),  # Compression process
-      lambda inp: BaseCycle.state_change(inp, 'H', 'P', 1, ty1='lin', ty2='lin'),  # Heat removal
-      lambda inp: BaseCycle.state_change(inp, 'H', 'P', 2, ty1='log', ty2='log'),  # Expansion
-      lambda inp: BaseCycle.state_change(inp, 'H', 'P', 3, ty1='lin', ty2='lin')  # Heat addition
-      ]
+        lambda inp: BaseCycle.state_change(inp, 'S', 'P', 0, ty1='log', ty2='log'),  # Compression process
+        lambda inp: BaseCycle.state_change(inp, 'H', 'P', 1, ty1='lin', ty2='lin'),  # Heat removal
+        lambda inp: BaseCycle.state_change(inp, 'H', 'P', 2, ty1='log', ty2='log'),  # Expansion
+        lambda inp: BaseCycle.state_change(inp, 'H', 'P', 3, ty1='lin', ty2='lin')  # Heat addition
+    ]
 
     def __init__(self, fluid_ref='HEOS::Water', graph_type='PH', **kwargs):
         """see :class:`CoolProp.Plots.SimpleCyclesCompression.BaseCompressionCycle` for details."""
@@ -225,7 +225,9 @@ class SimpleCompressionCycle(BaseCompressionCycle):
         -------
         float
         """
-        return (self.cycle_states[1, 'H'] - self.cycle_states[2, 'H']) / (self.cycle_states[1, 'H'] - self.cycle_states[0, 'H'])
+        dH_12 = self.cycle_states[1, 'H'] - self.cycle_states[2, 'H']
+        dH_10 = self.cycle_states[1, 'H'] - self.cycle_states[0, 'H']
+        return dH_12 / dH_10
 
     def COP_cooling(self):
         """COP for a cooling process
@@ -236,4 +238,6 @@ class SimpleCompressionCycle(BaseCompressionCycle):
         -------
         float
         """
-        return (self.cycle_states[0, 'H'] - self.cycle_states[3, 'H']) / (self.cycle_states[1, 'H'] - self.cycle_states[0, 'H'])
+        dH_03 = self.cycle_states[0, 'H'] - self.cycle_states[3, 'H']
+        dH_10 = self.cycle_states[1, 'H'] - self.cycle_states[0, 'H']
+        return dH_03 / dH_10

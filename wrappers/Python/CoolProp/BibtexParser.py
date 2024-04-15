@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
-
 from __future__ import division, absolute_import, print_function
 from __future__ import generators
 import pybtex.plugin, pybtex.database.input.bibtex, pybtex.errors
@@ -14,6 +13,8 @@ import six
 # but this seems to work...
 import pybtex.style.formatting as formatting
 from pybtex.style.template import node, join
+
+
 # Create our new function
 
 
@@ -182,7 +183,7 @@ class BibTeXerClass(object):
             'html': '</dt>',
             'markdown': ']',
             'plaintext': ']',
-            }  # How do we find the end of the label?
+        }  # How do we find the end of the label?
 
         end_of_label = contents.index(label_table[fmt])
         contents = contents[end_of_label + len(label_table[fmt]):].strip()

@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function, division, absolute_import
 
-
 import matplotlib, warnings
 import numpy as np
-
 
 import CoolProp
 from CoolProp.CoolProp import PropsSI
@@ -31,10 +29,17 @@ def SimpleCycle(Ref, Te, Tc, DTsh, DTsc, eta_a, Ts_Ph='Ph', **kwargs):
     * skipPlot : If True, won't actually plot anything, just print COP
 
     """
-    warnings.warn("This function has been deprecated. Please consider converting it to an object inheriting from \"BaseCycle\".", DeprecationWarning)
+    warnings.warn(
+        "This function has been deprecated. Please consider converting it to an object inheriting from \"BaseCycle\".",
+        DeprecationWarning
+    )
 
     for i in kwargs:
-        warnings.warn("This function has been deprecated, your input \"{0}: {1}\" will be ignored".format(i, kwargs[i]), DeprecationWarning)
+        warnings.warn(
+            "This function has been deprecated, your input \"{0}: {1}\" will be ignored"
+            .format(i, kwargs[i]),
+            DeprecationWarning
+        )
 
     from CoolProp.Plots import SimpleCompressionCycle
     cycle = SimpleCompressionCycle(fluid_ref=Ref, graph_type=Ts_Ph)
@@ -42,7 +47,8 @@ def SimpleCycle(Ref, Te, Tc, DTsh, DTsc, eta_a, Ts_Ph='Ph', **kwargs):
     print(cycle.COP_cooling(), cycle.COP_heating())
 
 
-def TwoStage(Ref, Q, Te, Tc, DTsh, DTsc, eta_oi, f_p, Tsat_ic, DTsh_ic, Ts_Ph='Ph', prints=False, skipPlot=False, axis=None, **kwargs):
+def TwoStage(Ref, Q, Te, Tc, DTsh, DTsc, eta_oi, f_p, Tsat_ic, DTsh_ic,
+             Ts_Ph='Ph', prints=False, skipPlot=False, axis=None, **kwargs):
     """
     This function plots a two-stage cycle, on the current axis, or that given by the optional parameter *axis*
 
@@ -68,7 +74,10 @@ def TwoStage(Ref, Q, Te, Tc, DTsh, DTsc, eta_oi, f_p, Tsat_ic, DTsh_ic, Ts_Ph='P
 
     """
 
-    warnings.warn("This function has been deprecated. PLease consider converting it to an object inheriting from \"BaseCycle\".", DeprecationWarning)
+    warnings.warn(
+        "This function has been deprecated. PLease consider converting it to an object inheriting from \"BaseCycle\".",
+        DeprecationWarning
+    )
 
     T = np.zeros((8))
     h = np.zeros_like(T)
@@ -113,7 +122,7 @@ def TwoStage(Ref, Q, Te, Tc, DTsh, DTsc, eta_oi, f_p, Tsat_ic, DTsh_ic, Ts_Ph='P
     s[4] = PropsSI('S', 'T', T[4], 'P', pc, Ref)
     rho[4] = PropsSI('D', 'T', T[4], 'P', pc, Ref)
 
-    sbubble_e = PropsSI('S', 'T', Tbubble_e, 'Q', 0, Ref)
+    # sbubble_e = PropsSI('S', 'T', Tbubble_e, 'Q', 0, Ref)
     sbubble_c = PropsSI('S', 'T', Tbubble_c, 'Q', 0, Ref)
     sdew_e = PropsSI('S', 'T', Te, 'Q', 1, Ref)
     sdew_c = PropsSI('S', 'T', Tc, 'Q', 1, Ref)
@@ -135,9 +144,9 @@ def TwoStage(Ref, Q, Te, Tc, DTsh, DTsc, eta_oi, f_p, Tsat_ic, DTsh_ic, Ts_Ph='P
     T[7] = T[1]
     p = [np.nan, pe, pic, pic, pc, pc, pe, pe]
     COP = Q / (Wdot1 + Wdot2)
-    RE = h[1] - h[6]
+    # RE = h[1] - h[6]
 
-    if prints == True:
+    if prints:
         print('x5:', x)
         print('COP:', COP)
         print('COPH', (Q + Wdot1 + Wdot2) / (Wdot1 + Wdot2))
@@ -151,8 +160,8 @@ def TwoStage(Ref, Q, Te, Tc, DTsh, DTsc, eta_oi, f_p, Tsat_ic, DTsh_ic, Ts_Ph='P
     else:
         print(Tsat_ic, COP)
 
-    if skipPlot == False:
-        if axis == None:
+    if not skipPlot:
+        if axis is None:
             ax = matplotlib.pyplot.gca()
         else:
             ax = axis
@@ -181,10 +190,12 @@ def TwoStage(Ref, Q, Te, Tc, DTsh, DTsc, eta_oi, f_p, Tsat_ic, DTsh_ic, Ts_Ph='P
             T = T_copy
         else:
             raise TypeError('Type of Ts_Ph invalid')
+
     return COP
 
 
-def EconomizedCycle(Ref, Qin, Te, Tc, DTsh, DTsc, eta_oi, f_p, Ti, Ts_Ph='Ts', skipPlot=False, axis=None, **kwargs):
+def EconomizedCycle(Ref, Qin, Te, Tc, DTsh, DTsc, eta_oi, f_p, Ti, Ts_Ph='Ts',
+                    skipPlot=False, axis=None, **kwargs):
     """
     This function plots an economized cycle, on the current axis, or that given by the optional parameter *axis*
 
@@ -208,12 +219,15 @@ def EconomizedCycle(Ref, Qin, Te, Tc, DTsh, DTsc, eta_oi, f_p, Ti, Ts_Ph='Ts', s
 
     """
 
-    warnings.warn("This function has been deprecated. Please consider converting it to an object inheriting from \"BaseCycle\".", DeprecationWarning)
+    warnings.warn(
+        "This function has been deprecated. Please consider converting it to an object inheriting from \"BaseCycle\".",
+        DeprecationWarning
+    )
     from scipy.optimize import newton
 
     m = 1
 
-    T = np.zeros((11))
+    T = np.zeros(11)
     h = np.zeros_like(T)
     p = np.zeros_like(T)
     s = np.zeros_like(T)
@@ -301,15 +315,15 @@ def EconomizedCycle(Ref, Qin, Te, Tc, DTsh, DTsc, eta_oi, f_p, Ti, Ts_Ph='Ts', s
     h[10] = h[1]
     p[10] = p[1]
 
-    Tbubble_e = Te
+    # Tbubble_e = Te
     Tbubble_c = Tc
-    sbubble_e = PropsSI('S', 'T', Tbubble_e, 'Q', 0, Ref)
+    # sbubble_e = PropsSI('S', 'T', Tbubble_e, 'Q', 0, Ref)
     sbubble_c = PropsSI('S', 'T', Tbubble_c, 'Q', 0, Ref)
     sdew_e = PropsSI('S', 'T', Te, 'Q', 1, Ref)
     sdew_c = PropsSI('S', 'T', Tc, 'Q', 1, Ref)
 
-    Wdot1 = m * wdot1
-    Wdot2 = (m + x) * wdot2
+    # Wdot1 = m * wdot1
+    # Wdot2 = (m + x) * wdot2
     if skipPlot == False:
         if axis == None:
             ax = matplotlib.pyplot.gca()
@@ -344,18 +358,20 @@ def EconomizedCycle(Ref, Qin, Te, Tc, DTsh, DTsc, eta_oi, f_p, Ti, Ts_Ph='Ts', s
             raise TypeError('Type of Ts_Ph invalid')
 
     COP = m * (h[1] - h[9]) / (m * (h[2] - h[1]) + (m + x) * (h[4] - h[3]))
+
     for i in range(1, len(T) - 1):
         print('%d & %g & %g & %g & %g & %g \\\\' % (i, T[i] - 273.15, p[i], h[i], s[i], rho[i]))
     print(x, m * (h[1] - h[9]), (m * (h[2] - h[1]) + (m + x) * (h[4] - h[3])), COP)
     mdot = Qin / (h[1] - h[9])
     mdot_inj = x * mdot
-    print('x9', x9,)
+    print('x9', x9, )
     print('Qcond', (mdot + mdot_inj) * (h[4] - h[5]), 'T4', T[4] - 273.15)
     print(mdot, mdot + mdot_inj)
     f = 3500 / 60.
     eta_v = 0.7
     print('Vdisp1: ', mdot / (rho[1] * f * eta_v) * 1e6, 'cm^3')
     print('Vdisp2: ', (mdot + mdot_inj) / (rho[1] * f * eta_v) * 1e6, 'cm^3')
+
     return COP
 
     # class SimpleCycle(object):
@@ -363,6 +379,7 @@ def EconomizedCycle(Ref, Qin, Te, Tc, DTsh, DTsc, eta_oi, f_p, Ti, Ts_Ph='Ts', s
     #    def __init__(self, *args, **kwargs):
     #        object.__init__(self, *args, **kwargs)
     # (states, steps, fluid):
+
 
 #             Parameters
 #         ----------
@@ -402,13 +419,13 @@ class StatePoint(PropertyDict):
 
     # Significant digits in SI units
     ROUND_DECIMALS = {
-      CoolProp.iDmass: 5,
-      CoolProp.iHmass: 5,
-      CoolProp.iP: 2,
-      CoolProp.iSmass: 5,
-      CoolProp.iT: 5,
-      CoolProp.iUmass: 5,
-      CoolProp.iQ: 5
+        CoolProp.iDmass: 5,
+        CoolProp.iHmass: 5,
+        CoolProp.iP: 2,
+        CoolProp.iSmass: 5,
+        CoolProp.iT: 5,
+        CoolProp.iUmass: 5,
+        CoolProp.iQ: 5
     }
 
     def __iter__(self):
@@ -422,16 +439,23 @@ class StatePoint(PropertyDict):
 
     def __prop_compare(self, other, typ):
         # TODO
-        if self[typ] is None and other[typ] is None: return 0
-        elif self[typ] is None and other[typ] is not None: return -1
-        elif self[typ] is not None and other[typ] is None: return 1
+        if self[typ] is None and other[typ] is None:
+            return 0
+        elif self[typ] is None and other[typ] is not None:
+            return -1
+        elif self[typ] is not None and other[typ] is None:
+            return 1
         else:
             A = np.round(self[typ], self.ROUND_DECIMALS[typ])
             B = np.round(other[typ], self.ROUND_DECIMALS[typ])
-            if A > B: return 1
-            elif A < B: return -1
-            elif A == B: return 0
-            else: raise ValueError("Comparison failed.")
+            if A > B:
+                return 1
+            elif A < B:
+                return -1
+            elif A == B:
+                return 0
+            else:
+                raise ValueError("Comparison failed.")
 
     def __eq__(self, other):
         for i in self:
@@ -474,16 +498,20 @@ class StateContainer(object):
         self._units = unit_system
 
     @property
-    def points(self): return self._points
+    def points(self):
+        return self._points
 
     @points.setter
-    def points(self, value): self._points = value
+    def points(self, value):
+        self._points = value
 
     @property
-    def units(self): return self._units
+    def units(self):
+        return self._units
 
     @units.setter
-    def units(self, value): self._units = value
+    def units(self, value):
+        self._units = value
 
     def get_point(self, index, SI=True):
         if SI:
@@ -492,6 +520,7 @@ class StateContainer(object):
             state = self[index]
             for i in state:
                 state[i] = self.units[i].from_SI(state[i])
+
         return state
 
     def set_point(self, index, value, SI=True):
@@ -501,12 +530,13 @@ class StateContainer(object):
             for i in value:
                 self._points[index][i] = self.units[i].to_SI(value[i])
 
-    def _list_like(self, value):
+    @staticmethod
+    def _list_like(value):
         """Try to detect a list-like structure excluding strings"""
-        return (not hasattr(value, "strip") and
-            (hasattr(value, "__getitem__") or
-            hasattr(value, "__iter__")))
         # return is_sequence(value) # use from pandas.core.common import is_sequence
+        return (not hasattr(value, "strip") and
+                (hasattr(value, "__getitem__") or
+                 hasattr(value, "__iter__")))
 
     def __len__(self):
         """Some cheating to get the correct behaviour"""
@@ -564,7 +594,7 @@ class StateContainer(object):
             for j in self._points[i]:
                 try:
                     row.append(u"{0:11.3f}".format(self.units[j].from_SI(self._points[i][j])))
-                except:
+                except:  # TODO: explict exception clause
                     row.append(u"{0:>11s}".format("-"))
             out = out + u"  ".join(row) + "\n"
         return out
@@ -580,29 +610,37 @@ class StateContainer(object):
         for j in new:
             for k in new[j]:
                 self[i, k] = new[j][k]
-            i = i + 1
+            i += 1
+
         return self
 
     @property
-    def D(self): return np.array([self._points[k].D for k in self])
+    def D(self):
+        return np.array([self._points[k].D for k in self])
 
     @property
-    def H(self): return np.array([self._points[k].H for k in self])
+    def H(self):
+        return np.array([self._points[k].H for k in self])
 
     @property
-    def P(self): return np.array([self._points[k].P for k in self])
+    def P(self):
+        return np.array([self._points[k].P for k in self])
 
     @property
-    def S(self): return np.array([self._points[k].S for k in self])
+    def S(self):
+        return np.array([self._points[k].S for k in self])
 
     @property
-    def T(self): return np.array([self._points[k].T for k in self])
+    def T(self):
+        return np.array([self._points[k].T for k in self])
 
     @property
-    def U(self): return np.array([self._points[k].U for k in self])
+    def U(self):
+        return np.array([self._points[k].U for k in self])
 
     @property
-    def Q(self): return np.array([self._points[k].Q for k in self])
+    def Q(self):
+        return np.array([self._points[k].Q for k in self])
 
 
 class BaseCycle(BasePlot):
@@ -610,11 +648,11 @@ class BaseCycle(BasePlot):
 
     # Define the iteration keys
     PROPERTIES = {
-      CoolProp.iDmass: 'density',
-      CoolProp.iHmass: 'specific enthalpy',
-      CoolProp.iP: 'pressure',
-      CoolProp.iSmass: 'specific entropy',
-      CoolProp.iT: 'temperature'
+        CoolProp.iDmass: 'density',
+        CoolProp.iHmass: 'specific enthalpy',
+        CoolProp.iP: 'pressure',
+        CoolProp.iSmass: 'specific entropy',
+        CoolProp.iT: 'temperature'
     }
 
     STATECOUNT = 0
@@ -645,19 +683,27 @@ class BaseCycle(BasePlot):
         BasePlot.__init__(self, fluid_ref, graph_type, unit_system, **kwargs)
 
     @property
-    def cycle_states(self): return self._cycle_states
+    def cycle_states(self):
+        return self._cycle_states
 
     @cycle_states.setter
     def cycle_states(self, value):
         if len(value) != self.STATECOUNT:
-            raise ValueError("Your number of states ({0:d}) is not in the list of allowed state counts: {1:s}.".format(len(value), str(self.STATECOUNT)))
+            raise ValueError(
+                "Your number of states ({0:d}) is not in the list of allowed state counts: {1:s}."
+                .format(
+                    len(value),
+                    str(self.STATECOUNT)
+                ))
         self._cycle_states = value
 
     @property
-    def steps(self): return self._steps
+    def steps(self):
+        return self._steps
 
     @steps.setter
-    def steps(self, value): self._steps = int(max([value, 2]))
+    def steps(self, value):
+        self._steps = int(max([value, 2]))
 
     @BasePlot.system.setter
     def system(self, value):
@@ -666,7 +712,12 @@ class BaseCycle(BasePlot):
         elif isinstance(value, PropertyDict):
             self._system = value
         else:
-            raise ValueError("Invalid unit_system input \"{0:s}\", expected a string from {1:s}".format(str(value), str(self.UNIT_SYSTEMS.keys())))
+            raise ValueError(
+                "Invalid unit_system input \"{0:s}\", expected a string from {1:s}"
+                .format(
+                    str(value),
+                    str(self.UNIT_SYSTEMS.keys())
+                ))
         self._cycle_states.units = self._system
 
     def valid_states(self):
@@ -691,13 +742,13 @@ class BaseCycle(BasePlot):
                     full = False
             if full: continue
             if (objs[i][CoolProp.iDmass] is not None and
-              objs[i][CoolProp.iT] is not None):
+                objs[i][CoolProp.iT] is not None):
                 self._state.update(CoolProp.DmassT_INPUTS, objs[i][CoolProp.iDmass], objs[i][CoolProp.iT])
             elif (objs[i][CoolProp.iP] is not None and
-              objs[i][CoolProp.iHmass] is not None):
+                  objs[i][CoolProp.iHmass] is not None):
                 self._state.update(CoolProp.HmassP_INPUTS, objs[i][CoolProp.iHmass], objs[i][CoolProp.iP])
             elif (objs[i][CoolProp.iP] is not None and
-              objs[i][CoolProp.iSmass] is not None):
+                  objs[i][CoolProp.iSmass] is not None):
                 self._state.update(CoolProp.PSmass_INPUTS, objs[i][CoolProp.iP], objs[i][CoolProp.iSmass])
             else:
                 warnings.warn("Please fill the state[{0:s}] manually.".format(str(i)))

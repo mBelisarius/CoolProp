@@ -37,22 +37,46 @@ cpdef HAPropsSI(string OutputName, string Input1Name, Input1, string Input2Name,
 
     For more information, go to http://www.coolprop.org
     """
-    
-    if isinstance(Input1, (int, long, float, complex)) and isinstance(Input2, (int, long, float, complex)) and isinstance(Input3, (int, long, float, complex)):
+
+    condition1 = isinstance(Input1, (int, long, float, complex))
+    condition2 = isinstance(Input2, (int, long, float, complex))
+    condition3 = isinstance(Input3, (int, long, float, complex))
+    if condition1 and condition2 and condition3:
         val = _HAPropsSI(OutputName, Input1Name, Input1, Input2Name, Input2, Input3Name, Input3)
-    
+
         if math.isinf(val) or math.isnan(val):
             err_string = _get_global_param_string(b'errstring')
             if not len(err_string) == 0:
-                raise ValueError("{err:s} :: inputs were:\"{out:s}\",\"{in1n:s}\",{in1:0.16e},\"{in2n:s}\",{in2:0.16e},\"{in3n:s}\",{in3:0.16e} ".format(err=err_string,out=OutputName,in1n=Input1Name,in1=Input1,in2n=Input2Name,in2=Input2,in3n=Input3Name,in3=Input3))
+                raise ValueError(
+                    "{err:s} :: inputs were:\"{out:s}\",\"{in1n:s}\",{in1:0.16e},\"{in2n:s}\",{in2:0.16e},\"{in3n:s}\",{in3:0.16e} "
+                    .format(
+                        err=err_string,
+                        out=OutputName,
+                        in1n=Input1Name,
+                        in1=Input1,
+                        in2n=Input2Name,
+                        in2=Input2,
+                        in3n=Input3Name,
+                        in3=Input3
+                    ))
             else:
-                raise ValueError("HAProps failed ungracefully with inputs: \"{out:s}\",\"{in1n:s}\",{in1:0.16e},\"{in2n:s}\",{in2:0.16e},\"{in3n:s}\",{in3:0.16e} ".format(out=OutputName,in1n=Input1Name,in1=Input1,in2n=Input2Name,in2=Input2,in3n=Input3Name,in3=Input3))
-        
-        return val #Error raised by HAProps on failure
-        
+                raise ValueError(
+                    "HAProps failed ungracefully with inputs: \"{out:s}\",\"{in1n:s}\",{in1:0.16e},\"{in2n:s}\",{in2:0.16e},\"{in3n:s}\",{in3:0.16e} "
+                    .format(
+                        out=OutputName,
+                        in1n=Input1Name,
+                        in1=Input1,
+                        in2n=Input2Name,
+                        in2=Input2,
+                        in3n=Input3Name,
+                        in3=Input3
+                    ))
+
+        return val  #Error raised by HAProps on failure
+
     # At least one is iterable, convert non-iterable to a list of the same length
     elif iterable(Input1) or iterable(Input2) or iterable(Input3):
-        
+
         iterable_lengths = []
         if iterable(Input1):
             iterable_lengths.append(len(Input1))
@@ -60,41 +84,62 @@ cpdef HAPropsSI(string OutputName, string Input1Name, Input1, string Input2Name,
             iterable_lengths.append(len(Input2))
         if iterable(Input3):
             iterable_lengths.append(len(Input3))
-        
+
         if not len(set(iterable_lengths)) == 1:
-            raise TypeError("Iterable inputs are not all the same length.  Lengths: "+str(iterable_lengths))
+            raise TypeError("Iterable inputs are not all the same length.  Lengths: " + str(iterable_lengths))
         else:
             L = iterable_lengths[0]
-        
+
         if not iterable(Input1):
-            Input1vec = [Input1]*L
+            Input1vec = [Input1] * L
         else:
             Input1vec = Input1
-            
+
         if not iterable(Input2):
-            Input2vec = [Input2]*L
+            Input2vec = [Input2] * L
         else:
             Input2vec = Input2
-            
+
         if not iterable(Input3):
-            Input3vec = [Input3]*L
+            Input3vec = [Input3] * L
         else:
             Input3vec = Input3
-        
+
         vals = []
-        
+
         for _Input1, _Input2, _Input3 in zip(Input1vec, Input2vec, Input3vec):
             val = _HAPropsSI(OutputName, Input1Name, _Input1, Input2Name, _Input2, Input3Name, _Input3)
-        
+
             if math.isinf(val) or math.isnan(val):
                 err_string = _get_global_param_string(b'errstring')
                 if not len(err_string) == 0:
-                    raise ValueError("{err:s} :: inputs were:\"{out:s}\",\"{in1n:s}\",{in1:0.16e},\"{in2n:s}\",{in2:0.16e},\"{in3n:s}\",{in3:0.16e}".format(err=err_string,out=OutputName,in1n=Input1Name,in1=_Input1,in2n=Input2Name,in2=_Input2,in3n=Input3Name,in3=_Input3))
+                    raise ValueError(
+                        "{err:s} :: inputs were:\"{out:s}\",\"{in1n:s}\",{in1:0.16e},\"{in2n:s}\",{in2:0.16e},\"{in3n:s}\",{in3:0.16e}"
+                        .format(
+                            err=err_string,
+                            out=OutputName,
+                            in1n=Input1Name,
+                            in1=_Input1,
+                            in2n=Input2Name,
+                            in2=_Input2,
+                            in3n=Input3Name,
+                            in3=_Input3
+                        ))
                 else:
-                    raise ValueError("HAPropsSI failed ungracefully with inputs: \"{out:s}\",\"{in1n:s}\",{in1:0.16e},\"{in2n:s}\",{in2:0.16e},\"{in3n:s}\",{in3:0.16e} ".format(out=OutputName,in1n=Input1Name,in1=_Input1,in2n=Input2Name,in2=_Input2,in3n=Input3Name,in3=_Input3))
-            
+                    raise ValueError(
+                        "HAPropsSI failed ungracefully with inputs: \"{out:s}\",\"{in1n:s}\",{in1:0.16e},\"{in2n:s}\",{in2:0.16e},\"{in3n:s}\",{in3:0.16e} "
+                        .format(
+                            out=OutputName,
+                            in1n=Input1Name,
+                            in1=_Input1,
+                            in2n=Input2Name,
+                            in2=_Input2,
+                            in3n=Input3Name,
+                            in3=_Input3
+                        ))
+
             vals.append(val)
-            
+
         if _numpy_supported and isinstance(Input1, np.ndarray):
             return np.array(vals).reshape(Input1.shape)
         elif _numpy_supported and isinstance(Input2, np.ndarray):
@@ -103,30 +148,54 @@ cpdef HAPropsSI(string OutputName, string Input1Name, Input1, string Input2Name,
             return np.array(vals).reshape(Input3.shape)
         else:
             return vals
-    
+
     else:
         raise TypeError('Numerical inputs to HAPropsSI must be ints, floats, lists, or 1D numpy arrays.')
-        
+
 cpdef HAProps(string OutputName, string Input1Name, Input1, string Input2Name, Input2, string Input3Name, Input3):
     """
     DEPRECATED!!! Used the HAPropsSI function
     """
-    
-    if isinstance(Input1, (int, long, float, complex)) and isinstance(Input2, (int, long, float, complex)) and isinstance(Input3, (int, long, float, complex)):
+
+    condition1 = isinstance(Input1, (int, long, float, complex))
+    condition2 = isinstance(Input2, (int, long, float, complex))
+    condition3 = isinstance(Input3, (int, long, float, complex))
+    if condition1 and condition2 and condition3:
         val = _HAProps(OutputName, Input1Name, Input1, Input2Name, Input2, Input3Name, Input3)
-    
+
         if math.isinf(val) or math.isnan(val):
             err_string = _get_global_param_string(b'errstring')
             if not len(err_string) == 0:
-                raise ValueError("{err:s} :: inputs were:\"{out:s}\",\"{in1n:s}\",{in1:0.16e},\"{in2n:s}\",{in2:0.16e},\"{in3n:s}\",{in3:0.16e} ".format(err=err_string,out=OutputName,in1n=Input1Name,in1=Input1,in2n=Input2Name,in2=Input2,in3n=Input3Name,in3=Input3))
+                raise ValueError(
+                    "{err:s} :: inputs were:\"{out:s}\",\"{in1n:s}\",{in1:0.16e},\"{in2n:s}\",{in2:0.16e},\"{in3n:s}\",{in3:0.16e} "
+                    .format(
+                        err=err_string,
+                        out=OutputName,
+                        in1n=Input1Name,
+                        in1=Input1,
+                        in2n=Input2Name,
+                        in2=Input2,
+                        in3n=Input3Name,
+                        in3=Input3
+                    ))
             else:
-                raise ValueError("HAProps failed ungracefully with inputs: \"{out:s}\",\"{in1n:s}\",{in1:0.16e},\"{in2n:s}\",{in2:0.16e},\"{in3n:s}\",{in3:0.16e} ".format(out=OutputName,in1n=Input1Name,in1=Input1,in2n=Input2Name,in2=Input2,in3n=Input3Name,in3=Input3))
-        
-        return val #Error raised by HAProps on failure
-        
+                raise ValueError(
+                    "HAProps failed ungracefully with inputs: \"{out:s}\",\"{in1n:s}\",{in1:0.16e},\"{in2n:s}\",{in2:0.16e},\"{in3n:s}\",{in3:0.16e} "
+                    .format(
+                        out=OutputName,
+                        in1n=Input1Name,
+                        in1=Input1,
+                        in2n=Input2Name,
+                        in2=Input2,
+                        in3n=Input3Name,
+                        in3=Input3
+                    ))
+
+        return val  #Error raised by HAProps on failure
+
     # At least one is iterable, convert non-iterable to a list of the same length
     elif iterable(Input1) or iterable(Input2) or iterable(Input3):
-        
+
         iterable_lengths = []
         if iterable(Input1):
             iterable_lengths.append(len(Input1))
@@ -134,41 +203,62 @@ cpdef HAProps(string OutputName, string Input1Name, Input1, string Input2Name, I
             iterable_lengths.append(len(Input2))
         if iterable(Input3):
             iterable_lengths.append(len(Input3))
-        
+
         if not len(set(iterable_lengths)) == 1:
-            raise TypeError("Iterable inputs are not all the same length.  Lengths: "+str(iterable_lengths))
+            raise TypeError("Iterable inputs are not all the same length.  Lengths: " + str(iterable_lengths))
         else:
             L = iterable_lengths[0]
-        
+
         if not iterable(Input1):
-            Input1vec = [Input1]*L
+            Input1vec = [Input1] * L
         else:
             Input1vec = Input1
-            
+
         if not iterable(Input2):
-            Input2vec = [Input2]*L
+            Input2vec = [Input2] * L
         else:
             Input2vec = Input2
-            
+
         if not iterable(Input3):
-            Input3vec = [Input3]*L
+            Input3vec = [Input3] * L
         else:
             Input3vec = Input3
-        
+
         vals = []
-        
+
         for _Input1, _Input2, _Input3 in zip(Input1vec, Input2vec, Input3vec):
             val = _HAProps(OutputName, Input1Name, _Input1, Input2Name, _Input2, Input3Name, _Input3)
-        
+
             if math.isinf(val) or math.isnan(val):
                 err_string = _get_global_param_string(b'errstring')
                 if not len(err_string) == 0:
-                    raise ValueError("{err:s} :: inputs were:\"{out:s}\",\"{in1n:s}\",{in1:0.16e},\"{in2n:s}\",{in2:0.16e},\"{in3n:s}\",{in3:0.16e}".format(err=err_string,out=OutputName,in1n=Input1Name,in1=_Input1,in2n=Input2Name,in2=_Input2,in3n=Input3Name,in3=_Input3))
+                    raise ValueError(
+                        "{err:s} :: inputs were:\"{out:s}\",\"{in1n:s}\",{in1:0.16e},\"{in2n:s}\",{in2:0.16e},\"{in3n:s}\",{in3:0.16e}"
+                        .format(
+                            err=err_string,
+                            out=OutputName,
+                            in1n=Input1Name,
+                            in1=_Input1,
+                            in2n=Input2Name,
+                            in2=_Input2,
+                            in3n=Input3Name,
+                            in3=_Input3
+                        ))
                 else:
-                    raise ValueError("HAProps failed ungracefully with inputs: \"{out:s}\",\"{in1n:s}\",{in1:0.16e},\"{in2n:s}\",{in2:0.16e},\"{in3n:s}\",{in3:0.16e} ".format(out=OutputName,in1n=Input1Name,in1=_Input1,in2n=Input2Name,in2=_Input2,in3n=Input3Name,in3=_Input3))
-            
+                    raise ValueError(
+                        "HAProps failed ungracefully with inputs: \"{out:s}\",\"{in1n:s}\",{in1:0.16e},\"{in2n:s}\",{in2:0.16e},\"{in3n:s}\",{in3:0.16e} "
+                        .format(
+                            out=OutputName,
+                            in1n=Input1Name,
+                            in1=_Input1,
+                            in2n=Input2Name,
+                            in2=_Input2,
+                            in3n=Input3Name,
+                            in3=_Input3
+                        ))
+
             vals.append(val)
-            
+
         if _numpy_supported and isinstance(Input1, np.ndarray):
             return np.array(vals).reshape(Input1.shape)
         elif _numpy_supported and isinstance(Input2, np.ndarray):
@@ -177,9 +267,9 @@ cpdef HAProps(string OutputName, string Input1Name, Input1, string Input2Name, I
             return np.array(vals).reshape(Input3.shape)
         else:
             return vals
-    
+
     else:
-        raise TypeError('Numerical inputs to HAProps must be ints, floats, lists, or 1D numpy arrays.')        
+        raise TypeError('Numerical inputs to HAProps must be ints, floats, lists, or 1D numpy arrays.')
 
 cpdef tuple HAProps_Aux(str OutputName, double T, double p, double w):
     """
@@ -196,21 +286,21 @@ cpdef tuple HAProps_Aux(str OutputName, double T, double p, double w):
     * Baw [First cross virial coefficient]
     * Caww [Second air-water-water virial coefficient]
     * Caaw [Second air-air-water virial coefficient]
-    * beta_H 
+    * beta_H
     * kT
     * vbar_ws [Molar saturated volume of water vapor]
     * p_ws [Saturated vapor pressure of pure water (>=0.01C) or ice (<0.01 C)]
     * f [Enhancement factor]
     """
     #Convert all strings to byte-strings
-    cdef bytes units = (' '*100).encode('ascii')
+    cdef bytes units = (' ' * 100).encode('ascii')
     cdef bytes _OutputName = OutputName.encode('ascii')
-    
-    output = _HAProps_Aux(_OutputName,T,p,w,units)
+
+    output = _HAProps_Aux(_OutputName, T, p, w, units)
     units = units.strip()
-    units = units[0:len(units)-1] #Leave off the null character
+    units = units[0:len(units) - 1]  #Leave off the null character
     return output, units
-    
+
 cpdef double cair_sat(double T):
     """
     The derivative of the saturation enthalpy cair_sat = d(hsat)/dT
