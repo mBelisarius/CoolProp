@@ -314,10 +314,11 @@ class PropertyPlot(BasePlot):
 
         xdata = []
         ydata = []
-        old = statecontainer[len(statecontainer) - 1]
+        last_index = len(statecontainer) - 1
+        old = statecontainer[last_index]
         for i in statecontainer:
             point = statecontainer[i]
-            if point == old:
+            if point == old or i == last_index:
                 points.append(point)
                 old = point
                 continue
